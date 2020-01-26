@@ -23,7 +23,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var questChain in _questChains.OrderBy(x=>x.StepNumber))
+            @foreach (var questChain in _questChains.OrderBy(x => x.StepNumber))
             {
                 <tr @onclick="(() => NavigateToQuestView(questChain.QuestId))">
                     <td>@_quests.First(x => x.Id == questChain.QuestId).Name</td>
@@ -32,16 +32,22 @@ else
             }
         </tbody>
     </table>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
+        <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
+    </div>
 }
 
-@code {
+@code
+{
     private string _message = "Загрузка...";
     private Chain _chain;
 
     [Parameter]
     public int ChainId { get; set; }
-    private List<QuestChain> _questChains { get; set; }
-    private List<Quest> _quests { get; set; }
+
+    private List<QuestChain> _questChains;
+    private List<Quest> _quests;
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,9 +62,41 @@ else
         }
     }
 
+    private async Task DeleteChain()
+    {
+        HttpResponseMessage response;
+        foreach (var questChain in _questChains)
+        {
+            response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/questChains/{questChain.Id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Что-то пошло не так.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+        response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/chains");
+        }
+        else
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Что-то пошло не так.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+    }
+
+    private void EditChain()
+    {
+        NavigationManager.NavigateTo($"/chains/edit/{ChainId}");
+    }
+
     private void NavigateToQuestView(int questId)
     {
         NavigationManager.NavigateTo($"/quests/{questId}");
     }
-
 }

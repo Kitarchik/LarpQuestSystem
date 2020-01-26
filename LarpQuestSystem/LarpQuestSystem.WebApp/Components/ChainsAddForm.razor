@@ -125,13 +125,6 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (_selectedQuests.Any(x => x.Id < 1))
-        {
-            var parameters = new ModalParameters();
-            parameters.Add("Message", "Выберите квесты.");
-
-            Modal.Show<Notification>("Notification", parameters);
-        }
         else if (_selectedQuests.Select(x => x.Id).Distinct().Count() < _selectedQuests.Count)
         {
             var parameters = new ModalParameters();

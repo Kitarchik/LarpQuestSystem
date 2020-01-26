@@ -17,7 +17,7 @@ else
     <p><em>Название: @_location.Name</em></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="EditLocation">Редактировать локацию</button>
-        <button class="btn btn-primary" @onclick="DeleteLocation">Удалить локацию</button>
+        <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
     </div>
     if (_npcs.Any())
     {

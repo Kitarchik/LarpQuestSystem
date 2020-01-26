@@ -1,0 +1,154 @@
+﻿@page "/chains/edit/{ChainId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Редактировать цепочку квестов</h1>
+
+@if (_chain == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtChainName" class="col-sm-2 col-form-label">Название цепочки</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtChainName" class="form-control" @bind="@_chain.Name" />
+        </div>
+    </div>
+    @for (int i = 0; i < _selectedQuests.Count; i++)
+    {
+        <div class="form-group row">
+            <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+        </div>
+    }
+    <div class="form-group row">
+        <label for="nextQuest" class="col-sm-2 col-form-label">Следующий квест</label>
+        <select id="nextQuest" @onchange="@SelectQuest">
+            @foreach (var quest in _quests)
+            {
+                <option value="@quest.Id">@quest.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group row">
+        <button class="btn btn-primary" @onclick="@IncreaseSteps">Добавить шаг</button>
+        <button class="btn btn-primary" @onclick="@DecreaseSteps">Убрать шаг</button>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Chain _chain;
+    private List<Chain> _chains;
+    private List<QuestChain> _initialQuestChains;
+    private List<Quest> _selectedQuests;
+    private List<Quest> _quests;
+    private Quest _selectedQuest;
+
+    [Parameter]
+    public int ChainId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chains = await Http.GetJsonAsync<List<Chain>>($"http://localhost/LarpQuestSystem/api/chains");
+        _chain = await Http.GetJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
+        _quests = await Http.GetJsonAsync<List<Quest>>($"http://localhost/LarpQuestSystem/api/quests");
+        _initialQuestChains = await Http.GetJsonAsync<List<QuestChain>>($"http://localhost/LarpQuestSystem/api/questChains/byChainId/{ChainId}");
+        _initialQuestChains = _initialQuestChains.OrderBy(x => x.StepNumber).ToList();
+        _selectedQuests = _initialQuestChains.Select(x => _quests.FirstOrDefault(x1 => x1.Id == x.QuestId)).ToList();
+    }
+
+    protected async Task Submit()
+    {
+        if (_chains.Any(x => x.Name == _chain.Name && x.Id != _chain.Id))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Цепочка с таким именем уже существует.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_selectedQuests.Select(x => x.Id).Distinct().Count() < _selectedQuests.Count)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Нельзя выбирать повторяющиеся квесты.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (string.IsNullOrEmpty(_chain.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            await Http.PutJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains", _chain);
+            foreach (var questChain in _initialQuestChains)
+            {
+                var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/questChains/{questChain.Id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var parameters = new ModalParameters();
+                    parameters.Add("Message", "Что-то пошло не так.");
+
+                    Modal.Show<Notification>("Notification", parameters);
+                }
+            }
+            for (int i = 0; i < _selectedQuests.Count; i++)
+            {
+                var questChain = new QuestChain
+                {
+                    ChainId = _chain.Id,
+                    StepNumber = i + 1,
+                    QuestId = _selectedQuests[i].Id,
+                };
+                await Http.PostJsonAsync<QuestChain>("http://localhost/LarpQuestSystem/api/questChains", questChain);
+            }
+            NavigationManager.NavigateTo($"/chains/{ChainId}");
+        }
+    }
+
+    private void IncreaseSteps()
+    {
+        if (_selectedQuest != null && _selectedQuest.Id > 0)
+        {
+            _selectedQuests.Add(new Quest
+            {
+                Id = _selectedQuest.Id,
+                Name = _selectedQuest.Name,
+            });
+        }
+        StateHasChanged();
+    }
+
+    private void DecreaseSteps()
+    {
+        if (_selectedQuests != null && _selectedQuests.Count > 0)
+        {
+            _selectedQuests.RemoveAt(_selectedQuests.Count - 1);
+            StateHasChanged();
+        }
+    }
+
+    private void SelectQuest(ChangeEventArgs e)
+    {
+        var questId = int.Parse(e.Value.ToString());
+        _selectedQuest = _quests.FirstOrDefault(x => x.Id == questId);
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/chains/{ChainId}");
+    }
+}
