@@ -1,0 +1,148 @@
+﻿@page "/quests/edit/{QuestId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Редактировать локацию</h1>
+
+@if (_quest == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <EditForm Model="@_quest" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
+            <div class="col-sm-10">
+                <InputText id="txtQuestName" class="form-control" @bind-Value="@_quest.Name"></InputText>
+                <ValidationMessage For="@(() => _quest.Name)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
+            <div class="col-sm-10">
+                <InputText id="txtArtisticTextLink" class="form-control" @bind-Value="@_quest.ArtisticTextLink"></InputText>
+                <ValidationMessage For="@(() => _quest.ArtisticTextLink)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtTechnicalTextLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
+            <div class="col-sm-10">
+                <InputText id="txtTechnicalTextLink" class="form-control" @bind-Value="@_quest.TechnicalDescriptionLink"></InputText>
+                <ValidationMessage For="@(() => _quest.TechnicalDescriptionLink)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtQuestGiver" class="col-sm-2 col-form-label">НПС выдающий квест</label>
+            <div class="col-sm-10">
+                <select id="txtQuestGiver" @bind="_quest.QuestGiverId">
+                    @foreach (var npc in _npcs)
+                    {
+                        <option value="@npc.Id">@npc.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtQuestEnding" class="col-sm-2 col-form-label">НПС принимающий квест</label>
+            <div class="col-sm-10">
+                <select id="txtQuestEnding" @bind="_quest.QuestEndingId">
+                    @foreach (var npc in _npcs)
+                    {
+                        <option value="@npc.Id">@npc.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
+            <div class="col-sm-10">
+                <select id="questComplexity" @bind="@_quest.Complexity">
+                    @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
+                    {
+                        <option value="@complexity">@GetStringComplexityValue(complexity)</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
+            <div class="col-sm-10">
+                <select id="questGrade" @bind="@_quest.Grade">
+                    @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
+                    {
+                        <option value="@grade">@GetStringGradeValue(grade)</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Quest _quest;
+    private List<Quest> _quests;
+    private List<Npc> _npcs;
+
+    [Parameter]
+    public int QuestId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quests = await Http.GetJsonAsync<List<Quest>>($"http://localhost/LarpQuestSystem/api/quests");
+        _quest = _quests.FirstOrDefault(x => x.Id == QuestId);
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"http://localhost/LarpQuestSystem/api/npcs");
+    }
+
+    protected async Task Submit()
+    {
+        if (_quests.Any(x => x.Name == _quest.Name && x.Id != _quest.Id))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Квест с таким именем уже существует.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (string.IsNullOrEmpty(_quest.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            await Http.PutJsonAsync<Location>("http://localhost/LarpQuestSystem/api/quests", _quest);
+            NavigationManager.NavigateTo($"/quests/{QuestId}");
+        }
+    }
+
+    private string GetStringComplexityValue(int complexity)
+    {
+        var enumValue = (QuestComplexity)complexity;
+        return enumValue.GetStringValue();
+    }
+
+    private string GetStringGradeValue(int grade)
+    {
+        var enumValue = (QuestGrade)grade;
+        return enumValue.GetStringValue();
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/quests/{QuestId}");
+    }
+}

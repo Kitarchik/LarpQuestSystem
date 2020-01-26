@@ -35,6 +35,7 @@ else
     <p><em>Квест выдает: @_questGiver.Name</em></p>
     <p><em>Квест принимает: @_questEnding.Name</em></p>
     <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
         <button class="btn btn-primary" @onclick="@DeleteQuest">Удалить квест</button>
     </div>
     @if (_questChains.Any())
@@ -156,5 +157,10 @@ else
     private void NavigateToChainView(int chainId)
     {
         NavigationManager.NavigateTo($"/chains/{chainId}");
+    }
+
+    private void EditQuest()
+    {
+        NavigationManager.NavigateTo($"/quests/edit/{QuestId}");
     }
 }
