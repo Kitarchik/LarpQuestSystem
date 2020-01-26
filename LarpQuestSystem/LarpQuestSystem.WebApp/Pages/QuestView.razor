@@ -75,19 +75,20 @@ else
     [Parameter]
     public int QuestId { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         _chains = new List<Chain>();
-        _quest = await Http.GetJsonAsync<Quest>($"http://localhost/LarpQuestSystem/api/quests/{QuestId}");
-        _questGiver = await Http.GetJsonAsync<Npc>($"http://localhost/LarpQuestSystem/api/npcs/{_quest.QuestGiverId}");
-        _questEnding = await Http.GetJsonAsync<Npc>($"http://localhost/LarpQuestSystem/api/npcs/{_quest.QuestEndingId}");
-        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"http://localhost/LarpQuestSystem/api/questChains/byQuestId/{QuestId}");
+        _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
+        _questGiver = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{_quest.QuestGiverId}");
+        _questEnding = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{_quest.QuestEndingId}");
+        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"{BaseApiUrl}/questChains/byQuestId/{QuestId}");
         if (_questChains.Any())
         {
             foreach (var questChain in _questChains)
             {
-                var chain = await Http.GetJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains/{questChain.ChainId}");
+                var chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{questChain.ChainId}");
                 _chains.Add(chain);
             }
         }
@@ -105,7 +106,7 @@ else
         }
         else
         {
-            var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/quests/{QuestId}");
+            var response = await Http.DeleteAsync($"{BaseApiUrl}/quests/{QuestId}");
             if (response.IsSuccessStatusCode)
             {
                 NavigationManager.NavigateTo("/quests");
@@ -133,7 +134,7 @@ else
     private async Task ChangeArtisticTextStatus()
     {
         _quest.IsArtisticTextReady = !_quest.IsArtisticTextReady;
-        await Http.PutJsonAsync<Quest>("http://localhost/LarpQuestSystem/api/quests", _quest);
+        await Http.PutJsonAsync<Quest>($"{BaseApiUrl}/quests", _quest);
         StateHasChanged();
     }
 
@@ -150,7 +151,7 @@ else
     private async Task ChangeTechnicalTextStatus()
     {
         _quest.IsTechnicalDescriptionReady = !_quest.IsTechnicalDescriptionReady;
-        await Http.PutJsonAsync<Quest>("http://localhost/LarpQuestSystem/api/quests", _quest);
+        await Http.PutJsonAsync<Quest>($"{BaseApiUrl}/quests", _quest);
         StateHasChanged();
     }
 

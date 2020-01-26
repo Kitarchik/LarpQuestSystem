@@ -47,13 +47,14 @@ else
     [Parameter]
     public int NpcId { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Npcs = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+        Npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
         _npc = Npcs.FirstOrDefault(x => x.Id == NpcId);
-        _location = await Http.GetJsonAsync<Location>($"http://localhost/LarpQuestSystem/api/locations/{_npc.LocationId}");
-        var allQuests = await Http.GetJsonAsync<List<Quest>>($"http://localhost/LarpQuestSystem/api/quests/forNpc/{NpcId}");
+        _location = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{_npc.LocationId}");
+        var allQuests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests/forNpc/{NpcId}");
         QuestsToGive = allQuests.Where(x => x.QuestGiverId == NpcId).ToList();
         QuestsToEnd = allQuests.Where(x => x.QuestEndingId == NpcId).ToList();
     }
@@ -67,7 +68,7 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/npcs/{NpcId}");
+        var response = await Http.DeleteAsync($"{BaseApiUrl}/npcs/{NpcId}");
         if (response.IsSuccessStatusCode)
         {
             NavigationManager.NavigateTo("/npcs");

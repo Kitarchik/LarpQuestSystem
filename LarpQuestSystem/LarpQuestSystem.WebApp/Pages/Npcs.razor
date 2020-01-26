@@ -22,9 +22,11 @@ else
     private List<Npc> _npcs { get; set; }
     private string _message = "Загрузка...";
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        _npcs = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
     }
 
     private void ChangeNpcs(List<Npc> npcs)

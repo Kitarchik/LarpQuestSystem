@@ -34,6 +34,8 @@ else
     [CascadingParameter]
     private List<Location> Locations { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     [Parameter]
     public Action<List<Location>> OnLocationsChange { get; set; }
 
@@ -72,7 +74,7 @@ else
             var requestMessage = new HttpRequestMessage()
             {
                 Method = new HttpMethod("POST"),
-                RequestUri = new Uri("http://localhost/LarpQuestSystem/api/locations"),
+                RequestUri = new Uri($"{BaseApiUrl}/locations"),
                 Content =
                     new StringContent(JsonConvert.SerializeObject(_locationToAdd)),
             };

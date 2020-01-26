@@ -57,13 +57,15 @@ else
     [Parameter]
     public int ChainId { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
-        _chains = await Http.GetJsonAsync<List<Chain>>($"http://localhost/LarpQuestSystem/api/chains");
-        _chain = await Http.GetJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
-        _quests = await Http.GetJsonAsync<List<Quest>>($"http://localhost/LarpQuestSystem/api/quests");
-        _initialQuestChains = await Http.GetJsonAsync<List<QuestChain>>($"http://localhost/LarpQuestSystem/api/questChains/byChainId/{ChainId}");
+        _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
+        _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
+        _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
+        _initialQuestChains = await Http.GetJsonAsync<List<QuestChain>>($"{BaseApiUrl}/questChains/byChainId/{ChainId}");
         _initialQuestChains = _initialQuestChains.OrderBy(x => x.StepNumber).ToList();
         _selectedQuests = _initialQuestChains.Select(x => _quests.FirstOrDefault(x1 => x1.Id == x.QuestId)).ToList();
     }
@@ -93,10 +95,10 @@ else
         }
         else
         {
-            await Http.PutJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains", _chain);
+            await Http.PutJsonAsync<Chain>($"{BaseApiUrl}/chains", _chain);
             foreach (var questChain in _initialQuestChains)
             {
-                var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/questChains/{questChain.Id}");
+                var response = await Http.DeleteAsync($"{BaseApiUrl}/questChains/{questChain.Id}");
                 if (!response.IsSuccessStatusCode)
                 {
                     var parameters = new ModalParameters();
@@ -113,7 +115,7 @@ else
                     StepNumber = i + 1,
                     QuestId = _selectedQuests[i].Id,
                 };
-                await Http.PostJsonAsync<QuestChain>("http://localhost/LarpQuestSystem/api/questChains", questChain);
+                await Http.PostJsonAsync<QuestChain>($"{BaseApiUrl}/questChains", questChain);
             }
             NavigationManager.NavigateTo($"/chains/{ChainId}");
         }

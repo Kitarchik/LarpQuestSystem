@@ -6,7 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>Редактировать локацию</h1>
+<h1>Редактировать НПС</h1>
 
 @if (_npc == null)
 {
@@ -51,11 +51,12 @@ else
     [Parameter]
     public int NpcId { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        _npcs = await Http.GetJsonAsync<List<Npc>>($"http://localhost/LarpQuestSystem/api/npcs");
-        _locations = await Http.GetJsonAsync<List<Location>>($"http://localhost/LarpQuestSystem/api/locations");
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
+        _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
         _npc = _npcs.FirstOrDefault(x => x.Id == NpcId);
 
     }
@@ -85,7 +86,7 @@ else
         }
         else
         {
-            await Http.PutJsonAsync<Location>("http://localhost/LarpQuestSystem/api/locations", _npc);
+            await Http.PutJsonAsync<Location>($"{BaseApiUrl}/npcs", _npc);
             NavigationManager.NavigateTo($"/npcs/{NpcId}");
         }
     }

@@ -22,9 +22,11 @@ else
     private List<Chain> _chains { get; set; }
     private string _message = "Загрузка...";
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        _chains = await Http.GetJsonAsync<List<Chain>>("http://localhost/LarpQuestSystem/api/chains");
+        _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
     }
 
     private void ChangeChains(List<Chain> chains)

@@ -49,15 +49,17 @@ else
     private List<QuestChain> _questChains;
     private List<Quest> _quests;
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        _chain = await Http.GetJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
-        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"http://localhost/LarpQuestSystem/api/questChains/byChainId/{ChainId}");
+        _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
+        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"{BaseApiUrl}/questChains/byChainId/{ChainId}");
         _quests = new List<Quest>();
 
         foreach (var questChain in _questChains)
         {
-            var quest = await Http.GetJsonAsync<Quest>($"http://localhost/LarpQuestSystem/api/quests/{questChain.QuestId}");
+            var quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{questChain.QuestId}");
             _quests.Add(quest);
         }
     }
@@ -67,7 +69,7 @@ else
         HttpResponseMessage response;
         foreach (var questChain in _questChains)
         {
-            response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/questChains/{questChain.Id}");
+            response = await Http.DeleteAsync($"{BaseApiUrl}/questChains/{questChain.Id}");
             if (!response.IsSuccessStatusCode)
             {
                 var parameters = new ModalParameters();
@@ -76,7 +78,7 @@ else
                 Modal.Show<Notification>("Notification", parameters);
             }
         }
-        response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
+        response = await Http.DeleteAsync($"{BaseApiUrl}/chains/{ChainId}");
         if (response.IsSuccessStatusCode)
         {
             NavigationManager.NavigateTo("/chains");

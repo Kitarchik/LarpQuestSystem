@@ -45,6 +45,8 @@ else
     [CascadingParameter]
     private List<Npc> Npcs { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     [Parameter]
     public Action<List<Npc>> OnNpcsChange { get; set; }
 
@@ -56,7 +58,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         _npcToAdd = new Npc();
-        _locations = await Http.GetJsonAsync<List<Location>>("http://localhost/LarpQuestSystem/api/locations");
+        _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
     }
 
     private void ShowForm()
@@ -92,7 +94,7 @@ else
             var requestMessage = new HttpRequestMessage()
             {
                 Method = new HttpMethod("POST"),
-                RequestUri = new Uri("http://localhost/LarpQuestSystem/api/npcs"),
+                RequestUri = new Uri($"{BaseApiUrl}/npcs"),
                 Content =
                     new StringContent(JsonConvert.SerializeObject(_npcToAdd)),
             };

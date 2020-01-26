@@ -19,12 +19,15 @@ else
 }
 
 @code {
+
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     private List<Location> _locations { get; set; }
     private string _message = "Загрузка...";
 
     protected override async Task OnInitializedAsync()
     {
-        _locations = await Http.GetJsonAsync<List<Location>>("http://localhost/LarpQuestSystem/api/locations");
+        _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
     }
 
     private void ChangeLocations(List<Location> locations)

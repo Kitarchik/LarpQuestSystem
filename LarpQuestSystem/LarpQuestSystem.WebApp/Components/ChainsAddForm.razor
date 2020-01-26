@@ -54,6 +54,8 @@ else
     [CascadingParameter]
     private List<Chain> Chains { get; set; }
 
+    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
     [Parameter]
     public Action<List<Chain>> OnChainsChange { get; set; }
 
@@ -68,7 +70,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         _selectedQuests = new List<Quest>();
-        Quests = await Http.GetJsonAsync<List<Quest>>("http://localhost/LarpQuestSystem/api/quests");
+        Quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
         if (Quests.Any())
         {
             _selectedQuest = Quests.First(x => x.Id == Quests.Select(x1 => x1.Id).Min());
@@ -137,7 +139,7 @@ else
             var requestMessage = new HttpRequestMessage()
             {
                 Method = new HttpMethod("POST"),
-                RequestUri = new Uri("http://localhost/LarpQuestSystem/api/chains"),
+                RequestUri = new Uri($"{BaseApiUrl}/chains"),
                 Content =
                     new StringContent(JsonConvert.SerializeObject(new Chain
                     {
@@ -163,7 +165,7 @@ else
                         StepNumber = i + 1,
                         QuestId = _selectedQuests[i].Id,
                     };
-                    await Http.PostJsonAsync<QuestChain>("http://localhost/LarpQuestSystem/api/questChains", questChain);
+                    await Http.PostJsonAsync<QuestChain>($"{BaseApiUrl}/questChains", questChain);
                 }
                 ChangeChains();
                 _chain = new Chain();
