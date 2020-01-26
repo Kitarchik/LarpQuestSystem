@@ -1,0 +1,97 @@
+﻿@page "/npcs/edit/{NpcId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Редактировать локацию</h1>
+
+@if (_npc == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <EditForm Model="@_npc" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
+            <div class="col-sm-10">
+                <InputText id="txtNpcName" class="form-control" @bind-Value="@_npc.Name"></InputText>
+                <ValidationMessage For="@(() => _npc.Name)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
+            <div class="col-sm-10">
+                <select id="txtNpcLocation" @bind="_npc.LocationId">
+                    @foreach (var location in _locations)
+                    {
+                        <option value="@location.Id">@location.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Npc _npc;
+    private List<Npc> _npcs;
+    private List<Location> _locations;
+
+    [Parameter]
+    public int NpcId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"http://localhost/LarpQuestSystem/api/npcs");
+        _locations = await Http.GetJsonAsync<List<Location>>($"http://localhost/LarpQuestSystem/api/locations");
+        _npc = _npcs.FirstOrDefault(x => x.Id == NpcId);
+
+    }
+
+    protected async Task Submit()
+    {
+        if (_npcs.Any(x => x.Name == _npc.Name && x.Id != _npc.Id))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "НПС с таким именем уже существует.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (string.IsNullOrEmpty(_npc.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_locations.All(x => x.Id != _npc.LocationId))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Выберите локацию.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            await Http.PutJsonAsync<Location>("http://localhost/LarpQuestSystem/api/locations", _npc);
+            NavigationManager.NavigateTo($"/npcs/{NpcId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/npcs/{NpcId}");
+    }
+}

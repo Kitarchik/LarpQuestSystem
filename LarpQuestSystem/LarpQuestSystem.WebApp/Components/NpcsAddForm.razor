@@ -1,0 +1,131 @@
+﻿@using System.Net
+@using LarpQuestSystem.Data.Model
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject IModalService Modal
+
+@if (!_showForm)
+{
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="ShowForm">Создать НПС</button>
+    </div>
+}
+else
+{
+    <EditForm Model="@_npcToAdd" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
+            <div class="col-sm-10">
+                <InputText id="txtNpcName" class="form-control" @bind-Value="@_npcToAdd.Name"></InputText>
+                <ValidationMessage For="@(() => _npcToAdd.Name)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
+            <div class="col-sm-10">
+                <select id="txtNpcLocation" @bind="_npcToAdd.LocationId">
+                    @foreach (var location in _locations)
+                    {
+                        <option value="@location.Id">@location.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="HideForm">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code
+{
+    [CascadingParameter]
+    private List<Npc> Npcs { get; set; }
+
+    [Parameter]
+    public Action<List<Npc>> OnNpcsChange { get; set; }
+
+    private List<Location> _locations { get; set; }
+
+    private Npc _npcToAdd;
+    private bool _showForm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _npcToAdd = new Npc();
+        _locations = await Http.GetJsonAsync<List<Location>>("http://localhost/LarpQuestSystem/api/locations");
+    }
+
+    private void ShowForm()
+    {
+        _showForm = true;
+        StateHasChanged();
+    }
+
+    private void HideForm()
+    {
+        _showForm = false;
+        StateHasChanged();
+    }
+
+    protected async Task Submit()
+    {
+        if (string.IsNullOrEmpty(_npcToAdd.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_npcToAdd.LocationId < 1)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Выберите локацию.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var requestMessage = new HttpRequestMessage()
+            {
+                Method = new HttpMethod("POST"),
+                RequestUri = new Uri("http://localhost/LarpQuestSystem/api/npcs"),
+                Content =
+                    new StringContent(JsonConvert.SerializeObject(_npcToAdd)),
+            };
+
+            requestMessage.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(
+                    "application/json");
+
+            var response = await Http.SendAsync(requestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonTask = response.Content.ReadAsStringAsync();
+                jsonTask.Wait();
+                _npcToAdd = JsonConvert.DeserializeObject<Npc>(jsonTask.Result);
+                ChangeNpcs();
+                _npcToAdd = new Npc();
+                _showForm = false;
+                StateHasChanged();
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "НПС с таким именем уже существует.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private void ChangeNpcs()
+    {
+        Npcs.Add(_npcToAdd);
+        OnNpcsChange?.Invoke(Npcs);
+    }
+}

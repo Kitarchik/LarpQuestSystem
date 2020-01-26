@@ -1,0 +1,89 @@
+﻿@page "/npcs/{NpcId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>НПС</h1>
+
+@if (_npc == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p><em>Имя: @_npc.Name</em></p>
+    <p><em>Локация: @_location.Name</em></p>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="EditNpc">Редактировать НПС</button>
+        <button class="btn btn-primary" @onclick="DeleteNpc">Удалить НПС</button>
+    </div>
+    if (QuestsToGive.Any())
+    {
+        <p><em>Список выдаваемых квестов</em></p>
+        <CascadingValue Value=@QuestsToGive>
+            <QuestTable Npcs="@Npcs" />
+        </CascadingValue>
+    }
+    if (QuestsToEnd.Any())
+    {
+        <p><em>Список завершаемых квестов</em></p>
+        <CascadingValue Value=@QuestsToEnd>
+            <QuestTable Npcs="@Npcs" />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Npc _npc;
+    private Location _location;
+    private List<Quest> QuestsToGive { get; set; }
+    private List<Quest> QuestsToEnd { get; set; }
+    private List<Npc> Npcs { get; set; }
+
+    [Parameter]
+    public int NpcId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Npcs = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+        _npc = Npcs.FirstOrDefault(x => x.Id == NpcId);
+        _location = await Http.GetJsonAsync<Location>($"http://localhost/LarpQuestSystem/api/locations/{_npc.LocationId}");
+        var allQuests = await Http.GetJsonAsync<List<Quest>>($"http://localhost/LarpQuestSystem/api/quests/forNpc/{NpcId}");
+        QuestsToGive = allQuests.Where(x => x.QuestGiverId == NpcId).ToList();
+        QuestsToEnd = allQuests.Where(x => x.QuestEndingId == NpcId).ToList();
+    }
+
+    private async Task DeleteNpc()
+    {
+        if (QuestsToEnd.Any() || QuestsToGive.Any())
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "ЭЭЭ! Он же квестами занимается! Удали сначала квесты.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/npcs/{NpcId}");
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/npcs");
+        }
+        else
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Что-то пошло не так.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+    }
+
+    private void EditNpc()
+    {
+        NavigationManager.NavigateTo($"/npcs/edit/{NpcId}");
+    }
+
+}

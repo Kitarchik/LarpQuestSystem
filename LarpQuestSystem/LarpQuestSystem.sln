@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LarpQuestSystem.Api", "LarpQuestSystem.Api\LarpQuestSystem.Api.csproj", "{F0956017-BFDA-44EE-9A4D-4752DAF0F27A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LarpQuestSystem.Data.Model", "LarpQuestSystem.Data.Model\LarpQuestSystem.Data.Model.csproj", "{0E6C9656-9851-47CD-9F35-1357E6C8CB8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LarpQuestSystem.Data", "LarpQuestSystem.Data\LarpQuestSystem.Data.csproj", "{32240623-07EB-41BA-B605-3E83506E6450}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LarpQuestSystem.WebApp", "LarpQuestSystem.WebApp\LarpQuestSystem.WebApp.csproj", "{C3758CF8-8D22-401A-917C-E7ABCDCF77DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F0956017-BFDA-44EE-9A4D-4752DAF0F27A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0956017-BFDA-44EE-9A4D-4752DAF0F27A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0956017-BFDA-44EE-9A4D-4752DAF0F27A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0956017-BFDA-44EE-9A4D-4752DAF0F27A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E6C9656-9851-47CD-9F35-1357E6C8CB8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E6C9656-9851-47CD-9F35-1357E6C8CB8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E6C9656-9851-47CD-9F35-1357E6C8CB8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E6C9656-9851-47CD-9F35-1357E6C8CB8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32240623-07EB-41BA-B605-3E83506E6450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32240623-07EB-41BA-B605-3E83506E6450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32240623-07EB-41BA-B605-3E83506E6450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32240623-07EB-41BA-B605-3E83506E6450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3758CF8-8D22-401A-917C-E7ABCDCF77DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3758CF8-8D22-401A-917C-E7ABCDCF77DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3758CF8-8D22-401A-917C-E7ABCDCF77DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3758CF8-8D22-401A-917C-E7ABCDCF77DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E774BD6-D947-4755-98F1-1DB45DC5D0F3}
+	EndGlobalSection
+EndGlobal

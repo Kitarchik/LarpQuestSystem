@@ -1,0 +1,64 @@
+﻿@page "/chains/{ChainId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Цепочка квестов</h1>
+
+@if (_chain == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p><em>Название: @_chain.Name</em></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название квеста</th>
+                <th>Шаг</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var questChain in _questChains.OrderBy(x=>x.StepNumber))
+            {
+                <tr @onclick="(() => NavigateToQuestView(questChain.QuestId))">
+                    <td>@_quests.First(x => x.Id == questChain.QuestId).Name</td>
+                    <td>@questChain.StepNumber</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Chain _chain;
+
+    [Parameter]
+    public int ChainId { get; set; }
+    private List<QuestChain> _questChains { get; set; }
+    private List<Quest> _quests { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chain = await Http.GetJsonAsync<Chain>($"http://localhost/LarpQuestSystem/api/chains/{ChainId}");
+        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"http://localhost/LarpQuestSystem/api/questChains/byChainId/{ChainId}");
+        _quests = new List<Quest>();
+
+        foreach (var questChain in _questChains)
+        {
+            var quest = await Http.GetJsonAsync<Quest>($"http://localhost/LarpQuestSystem/api/quests/{questChain.QuestId}");
+            _quests.Add(quest);
+        }
+    }
+
+    private void NavigateToQuestView(int questId)
+    {
+        NavigationManager.NavigateTo($"/quests/{questId}");
+    }
+
+}

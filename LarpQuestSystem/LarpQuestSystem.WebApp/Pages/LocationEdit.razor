@@ -1,0 +1,76 @@
+﻿@page "/locations/edit/{LocationId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Редактировать локацию</h1>
+
+@if (_location == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <EditForm Model="@_location" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtLocationName" class="col-sm-2 col-form-label">Название локации</label>
+            <div class="col-sm-10">
+                <InputText id="txtLocationName" class="form-control" @bind-Value="@_location.Name"></InputText>
+                <ValidationMessage For="@(() => _location.Name)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Location _location;
+    private List<Location> _locations;
+
+    [Parameter]
+    public int LocationId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _locations = await Http.GetJsonAsync<List<Location>>($"http://localhost/LarpQuestSystem/api/locations");
+        _location = _locations.FirstOrDefault(x => x.Id == LocationId);
+    }
+
+    protected async Task Submit()
+    {
+        if (_locations.Any(x=>x.Name==_location.Name && x.Id!=_location.Id))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Локация с таким именем уже существует.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (string.IsNullOrEmpty(_location.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            await Http.PutJsonAsync<Location>("http://localhost/LarpQuestSystem/api/locations", _location);
+            NavigationManager.NavigateTo($"/locations/{LocationId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/locations/{LocationId}");
+    }
+}

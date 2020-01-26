@@ -1,0 +1,22 @@
+﻿@inject IModalService ModalService
+
+<p>@Message</p>
+<button @onclick="@Ok" class="btn btn-primary">Ок</button>
+
+@code
+{
+    [CascadingParameter] ModalParameters Parameters { get; set; }
+
+    private string Message;
+
+    protected override void OnInitialized()
+    {
+        Message = Parameters.Get<string>("Message");
+        base.OnInitialized();
+    }
+
+    private void Ok()
+    {
+        ModalService.Cancel();
+    }
+}

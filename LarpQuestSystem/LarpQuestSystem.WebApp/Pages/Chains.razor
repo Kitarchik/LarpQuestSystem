@@ -1,0 +1,35 @@
+﻿@page "/chains"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Цепочки квестов</h1>
+
+@if (_chains == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_chains>
+        <ChainsAddForm OnChainsChange="@ChangeChains" />
+        <ChainsTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Chain> _chains { get; set; }
+    private string _message = "Загрузка...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chains = await Http.GetJsonAsync<List<Chain>>("http://localhost/LarpQuestSystem/api/chains");
+    }
+
+    private void ChangeChains(List<Chain> chains)
+    {
+        _chains = chains;
+        StateHasChanged();
+    }
+}

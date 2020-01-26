@@ -1,0 +1,35 @@
+﻿@page "/npcs"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Список НПС</h1>
+
+@if (_npcs == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_npcs>
+        <NpcsAddForm OnNpcsChange="ChangeNpcs" />
+        <NpcsTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Npc> _npcs { get; set; }
+    private string _message = "Загрузка...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _npcs = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+    }
+
+    private void ChangeNpcs(List<Npc> npcs)
+    {
+        _npcs = npcs;
+        StateHasChanged();
+    }
+}

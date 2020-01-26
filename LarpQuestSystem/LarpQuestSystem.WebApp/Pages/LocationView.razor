@@ -1,0 +1,78 @@
+﻿@page "/locations/{LocationId:int}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Локация</h1>
+
+@if (_location == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p><em>Название: @_location.Name</em></p>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="EditLocation">Редактировать локацию</button>
+        <button class="btn btn-primary" @onclick="DeleteLocation">Удалить локацию</button>
+    </div>
+    if (_npcs.Any())
+    {
+        <p><em>Список НПС этой локации</em></p>
+        <CascadingValue Value=@_npcs>
+            <NpcsTable />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private Location _location;
+    private List<Npc> _npcs;
+
+    [Parameter]
+    public int LocationId { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _location = await Http.GetJsonAsync<Location>($"http://localhost/LarpQuestSystem/api/locations/{LocationId}");
+        var allNpcs = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+        _npcs = allNpcs.Where(x => x.LocationId == LocationId).ToList();
+
+    }
+
+    private async Task DeleteLocation()
+    {
+        if (_npcs.Any())
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "А как же НПС, живущие в этой локации? Удалите сначала их.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var response = await Http.DeleteAsync($"http://localhost/LarpQuestSystem/api/locations/{LocationId}");
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/locations");
+            }
+            else
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Что-то пошло не так.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private void EditLocation()
+    {
+        NavigationManager.NavigateTo($"/locations/edit/{LocationId}");
+    }
+}

@@ -1,0 +1,56 @@
+﻿@using LarpQuestSystem.Data.Model
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название локации" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Название локации</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var location in _filteredLocations)
+        {
+            <tr @onclick="(() => NavigateToLocationView(location.Id))">
+                <td>@location.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<Location> _filteredLocations;
+    private string _filterString = string.Empty;
+
+    [CascadingParameter]
+    private List<Location> Locations { get; set; }
+
+    public string FilterString
+    {
+        get => _filterString;
+        set
+        {
+            _filterString = value;
+            FilterLocations();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredLocations = Locations;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterLocations()
+    {
+        _filteredLocations = Locations.Where(x => x.Name.Contains(_filterString, StringComparison.OrdinalIgnoreCase)).ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToLocationView(int locationId)
+    {
+        NavigationManager.NavigateTo($"/locations/{locationId}");
+    }
+
+}

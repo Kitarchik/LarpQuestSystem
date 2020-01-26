@@ -1,0 +1,40 @@
+﻿@page "/quests"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<h1>Квесты</h1>
+
+@if (_quests == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_quests>
+        <QuestsAddForm OnQuestsChange="ChangeQuests" />
+        <QuestTable Npcs="@_npcs"/>
+    </CascadingValue>
+}
+
+@code {
+    private List<Quest> _quests { get; set; }
+    private List<Npc> _npcs { get; set; }
+    private string _message = "Загрузка...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quests = await Http.GetJsonAsync<List<Quest>>("http://localhost/LarpQuestSystem/api/quests");
+        _npcs = await Http.GetJsonAsync<List<Npc>> ("http://localhost/LarpQuestSystem/api/npcs");
+    }
+
+    private void ChangeQuests(List<Quest> quests)
+    {
+        _quests = quests;
+        StateHasChanged();
+    }
+
+}

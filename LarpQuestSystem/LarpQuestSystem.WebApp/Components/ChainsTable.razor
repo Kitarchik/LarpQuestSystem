@@ -1,0 +1,56 @@
+﻿@using LarpQuestSystem.Data.Model
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Имя цепочки квестов" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя цепочки</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var chain in _filteredChains)
+        {
+            <tr @onclick="(() => NavigateToChainView(chain.Id))">
+                <td>@chain.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<Chain> _filteredChains;
+    private string _filterString = string.Empty;
+
+    [CascadingParameter]
+    private List<Chain> Chains { get; set; }
+
+    public string FilterString
+    {
+        get => _filterString;
+        set
+        {
+            _filterString = value;
+            FilterChains();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredChains = Chains;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterChains()
+    {
+        _filteredChains = Chains.Where(x => x.Name.Contains(_filterString, StringComparison.OrdinalIgnoreCase)).ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToChainView(int chainId)
+    {
+        NavigationManager.NavigateTo($"/chains/{chainId}");
+    }
+
+}

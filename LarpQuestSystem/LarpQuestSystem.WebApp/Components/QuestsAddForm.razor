@@ -1,0 +1,196 @@
+﻿@using System.Net
+@using LarpQuestSystem.Data.Model
+@using Newtonsoft.Json
+
+@inject HttpClient Http
+@inject IModalService Modal
+
+@if (!_showForm)
+{
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="ShowForm">Создать квест</button>
+    </div>
+}
+else
+{
+    <EditForm Model="@_questToAdd" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
+            <div class="col-sm-10">
+                <InputText id="txtQuestName" class="form-control" @bind-Value="@_questToAdd.Name"></InputText>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtQuestGiverName" class="col-sm-2 col-form-label">НПС выдающий квест</label>
+            <div class="col-sm-10">
+                <select id="txtQuestGiverName" @bind="@_questToAdd.QuestGiverId">
+                    @foreach (var npcGiver in _npcsGivers)
+                    {
+                        <option value="@npcGiver.Id">@npcGiver.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtQuestEndingName" class="col-sm-2 col-form-label">НПС принимающий квест</label>
+            <div class="col-sm-10">
+                <select id="txtQuestEndingName" @bind="@_questToAdd.QuestEndingId">
+                    @foreach (var npcEnder in _npcsEndings)
+                    {
+                        <option value="@npcEnder.Id">@npcEnder.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
+            <div class="col-sm-10">
+                <InputText id="txtArtisticTextLink" class="form-control" @bind-Value="@_questToAdd.ArtisticTextLink"></InputText>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtTechnicalDocumentLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
+            <div class="col-sm-10">
+                <InputText id="txtTechnicalDocumentLink" class="form-control" @bind-Value="@_questToAdd.TechnicalDescriptionLink"></InputText>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
+            <div class="col-sm-10">
+                <select id="questComplexity" @bind="@_questToAdd.Complexity">
+                    @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
+                    {
+                        <option value="@complexity">@GetStringComplexityValue(complexity)</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
+            <div class="col-sm-10">
+                <select id="questGrade" @bind="@_questToAdd.Grade">
+                    @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
+                    {
+                        <option value="@grade">@GetStringGradeValue(grade)</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="HideForm">Отмена</button>
+        </div>
+    </EditForm>
+}
+@code
+{
+    [CascadingParameter]
+    private List<Quest> Quests { get; set; }
+
+    [Parameter]
+    public Action<List<Quest>> OnQuestsChange { get; set; }
+
+    private Quest _questToAdd;
+    private bool _showForm;
+    private List<Npc> _npcsGivers;
+    private List<Npc> _npcsEndings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _questToAdd = new Quest();
+        _npcsGivers = await Http.GetJsonAsync<List<Npc>>("http://localhost/LarpQuestSystem/api/npcs");
+        _npcsEndings = _npcsGivers;
+    }
+
+    private void ShowForm()
+    {
+        _showForm = true;
+        StateHasChanged();
+    }
+
+    private void HideForm()
+    {
+        _showForm = false;
+        StateHasChanged();
+    }
+
+    protected async Task Submit()
+    {
+        if (string.IsNullOrEmpty(_questToAdd.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_questToAdd.QuestGiverId < 1)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Укажите кто выдает квест.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_questToAdd.QuestEndingId < 1)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Укажите кто принимает квест.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var requestMessage = new HttpRequestMessage()
+            {
+                Method = new HttpMethod("POST"),
+                RequestUri = new Uri("http://localhost/LarpQuestSystem/api/quests"),
+                Content =
+                    new StringContent(JsonConvert.SerializeObject(_questToAdd)),
+            };
+
+            requestMessage.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(
+                    "application/json");
+
+            var response = await Http.SendAsync(requestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonTask = response.Content.ReadAsStringAsync();
+                jsonTask.Wait();
+                _questToAdd = JsonConvert.DeserializeObject<Quest>(jsonTask.Result);
+                ChangeQuests();
+                _questToAdd = new Quest();
+                _showForm = false;
+                StateHasChanged();
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Квест с таким именем уже существует.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+        
+    }
+
+    private void ChangeQuests()
+    {
+        Quests.Add(_questToAdd);
+        OnQuestsChange?.Invoke(Quests);
+    }
+
+    private string GetStringComplexityValue(int complexity)
+    {
+        var enumValue = (QuestComplexity)complexity;
+        return enumValue.GetStringValue();
+    }
+
+    private string GetStringGradeValue(int grade)
+    {
+        var enumValue = (QuestGrade)grade;
+        return enumValue.GetStringValue();
+    }
+}
