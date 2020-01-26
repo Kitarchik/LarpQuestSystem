@@ -16,7 +16,13 @@ else
     <div class="form-group row">
         <label for="txtChainName" class="col-sm-2 col-form-label">Имя цепочки</label>
         <div class="col-sm-10">
-            <input type="text" id="txtChainName" class="form-control" @bind="@_chainName" />
+            <input type="text" id="txtChainName" class="form-control" @bind="@_chain.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtChainDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtChainDescription" rows="5" @bind="@_chain.Description"></textarea>
         </div>
     </div>
     @if (_selectedQuests != null)
@@ -54,14 +60,13 @@ else
     [CascadingParameter]
     private List<Chain> Chains { get; set; }
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     [Parameter]
     public Action<List<Chain>> OnChainsChange { get; set; }
 
     private List<Quest> Quests { get; set; }
 
-    private string _chainName;
     private List<Quest> _selectedQuests;
     private bool _showForm;
     private Quest _selectedQuest;
@@ -69,6 +74,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _chain = new Chain();
         _selectedQuests = new List<Quest>();
         Quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
         if (Quests.Any())
@@ -120,7 +126,7 @@ else
 
     protected async Task Submit()
     {
-        if (string.IsNullOrEmpty(_chainName))
+        if (string.IsNullOrEmpty(_chain.Name))
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Имя не может быть пустым.");
@@ -143,7 +149,8 @@ else
                 Content =
                     new StringContent(JsonConvert.SerializeObject(new Chain
                     {
-                        Name = _chainName,
+                        Name = _chain.Name,
+                        Description = _chain.Description,
                     })),
             };
 

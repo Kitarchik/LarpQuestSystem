@@ -6,6 +6,7 @@
     <thead>
         <tr>
             <th>Название локации</th>
+            <th>Описание</th>
         </tr>
     </thead>
     <tbody>
@@ -13,6 +14,7 @@
         {
             <tr @onclick="(() => NavigateToLocationView(location.Id))">
                 <td>@location.Name</td>
+                <td>@location.Description</td>
             </tr>
         }
     </tbody>

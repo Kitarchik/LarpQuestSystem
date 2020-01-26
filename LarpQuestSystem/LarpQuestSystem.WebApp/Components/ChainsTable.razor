@@ -6,6 +6,7 @@
     <thead>
         <tr>
             <th>Имя цепочки</th>
+            <th>Описание</th>
         </tr>
     </thead>
     <tbody>
@@ -13,6 +14,7 @@
         {
             <tr @onclick="(() => NavigateToChainView(chain.Id))">
                 <td>@chain.Name</td>
+                <td>@chain.Description</td>
             </tr>
         }
     </tbody>

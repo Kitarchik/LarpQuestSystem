@@ -63,6 +63,9 @@ namespace LarpQuestSystem.Data
                 .Property(x => x.Name)
                 .HasMaxLength(250);
             modelBuilder.Entity<Chain>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
+            modelBuilder.Entity<Chain>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
             modelBuilder.Entity<Item>()
@@ -74,6 +77,9 @@ namespace LarpQuestSystem.Data
             modelBuilder.Entity<Quest>()
                 .Property(x => x.Name)
                 .HasMaxLength(250);
+            modelBuilder.Entity<Quest>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
             modelBuilder.Entity<Quest>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
@@ -87,11 +93,17 @@ namespace LarpQuestSystem.Data
                 .Property(x => x.Name)
                 .HasMaxLength(250);
             modelBuilder.Entity<Npc>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
+            modelBuilder.Entity<Npc>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
             modelBuilder.Entity<Location>()
                 .Property(x => x.Name)
                 .HasMaxLength(250);
+            modelBuilder.Entity<Location>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
             modelBuilder.Entity<Location>()
                 .HasIndex(x => x.Name)
                 .IsUnique();

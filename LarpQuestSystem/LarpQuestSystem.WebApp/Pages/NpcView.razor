@@ -15,6 +15,7 @@
 else
 {
     <p><em>Имя: @_npc.Name</em></p>
+    <p><em>Описание: @_npc.Description</em></p>
     <p><em>Локация: @_location.Name</em></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="EditNpc">Редактировать НПС</button>
@@ -47,7 +48,7 @@ else
     [Parameter]
     public int NpcId { get; set; }
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

@@ -16,6 +16,7 @@
 else
 {
     <p><em>Имя: @_quest.Name</em></p>
+    <p><em>Описание: @_quest.Description</em></p>
     <p>
         <em>Художественный текст: @GetStatus(_quest.IsArtisticTextReady)</em>
         @if (!string.IsNullOrEmpty(_quest.ArtisticTextLink))
@@ -75,7 +76,7 @@ else
     [Parameter]
     public int QuestId { get; set; }
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

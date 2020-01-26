@@ -22,6 +22,12 @@ else
                 <ValidationMessage For="@(() => _locationToAdd.Name)"></ValidationMessage>
             </div>
         </div>
+        <div class="form-group row">
+            <label for="txtLocationDescription" class="col-sm-2 col-form-label">Описание</label>
+            <div class="col-sm-10">
+                <textarea class="form-control" id="txtLocationDescription" rows="5" @bind="@_locationToAdd.Description"></textarea>
+            </div>
+        </div>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <button class="btn btn-primary" @onclick="HideForm">Отмена</button>
@@ -34,7 +40,7 @@ else
     [CascadingParameter]
     private List<Location> Locations { get; set; }
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     [Parameter]
     public Action<List<Location>> OnLocationsChange { get; set; }
