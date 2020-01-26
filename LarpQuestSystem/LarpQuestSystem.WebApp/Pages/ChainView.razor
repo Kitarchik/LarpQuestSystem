@@ -24,10 +24,10 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var questChain in _questChains.OrderBy(x => x.StepNumber))
+            @foreach (var questChain in _chain.QuestChains.OrderBy(x => x.StepNumber))
             {
                 <tr @onclick="(() => NavigateToQuestView(questChain.QuestId))">
-                    <td>@_quests.First(x => x.Id == questChain.QuestId).Name</td>
+                    <td>@questChain.Quest.Name</td>
                     <td>@questChain.StepNumber</td>
                 </tr>
             }
@@ -47,28 +47,17 @@ else
     [Parameter]
     public int ChainId { get; set; }
 
-    private List<QuestChain> _questChains;
-    private List<Quest> _quests;
-
     [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
-        _questChains = await Http.GetJsonAsync<List<QuestChain>>($"{BaseApiUrl}/questChains/byChainId/{ChainId}");
-        _quests = new List<Quest>();
-
-        foreach (var questChain in _questChains)
-        {
-            var quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{questChain.QuestId}");
-            _quests.Add(quest);
-        }
     }
 
     private async Task DeleteChain()
     {
         HttpResponseMessage response;
-        foreach (var questChain in _questChains)
+        foreach (var questChain in _chain.QuestChains)
         {
             response = await Http.DeleteAsync($"{BaseApiUrl}/questChains/{questChain.Id}");
             if (!response.IsSuccessStatusCode)

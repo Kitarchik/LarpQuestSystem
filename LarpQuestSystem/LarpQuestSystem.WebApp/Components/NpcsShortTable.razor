@@ -6,7 +6,6 @@
     <thead>
         <tr>
             <th>Имя НПС</th>
-            <th>Локация</th>
             <th>Описание</th>
         </tr>
     </thead>
@@ -15,7 +14,6 @@
         {
             <tr @onclick="(() => NavigateToNpcView(npc.Id))">
                 <td>@npc.Name</td>
-                <td>@npc.Location.Name</td>
                 <td>@npc.Description</td>
             </tr>
         }

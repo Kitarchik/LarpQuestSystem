@@ -19,6 +19,17 @@ namespace LarpQuestSystem.Api.Controllers
             _db = context;
         }
 
+        [HttpGet("full")]
+        public async Task<ActionResult<IEnumerable<Quest>>> GetFull()
+        {
+            return await _db.Quests
+                .Include(x => x.QuestGiver)
+                .Include(x => x.QuestEnding)
+                .Include(x => x.QuestChains)
+                .ThenInclude(x => x.Chain)
+                .ToListAsync();
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quest>>> Get()
         {
@@ -28,16 +39,15 @@ namespace LarpQuestSystem.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Quest>> Get(int id)
         {
-            Quest quest = await _db.Quests.FirstOrDefaultAsync(x => x.Id == id);
+            Quest quest = await _db.Quests
+                .Include(x => x.QuestGiver)
+                .Include(x => x.QuestEnding)
+                .Include(x => x.QuestChains)
+                .ThenInclude(x=>x.Chain)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (quest == null)
                 return NotFound();
             return new ObjectResult(quest);
-        }
-
-        [HttpGet("forNpc/{id}")]
-        public async Task<ActionResult<IEnumerable<Quest>>> GetQuestsForNpc(int id)
-        {
-            return await _db.Quests.Where(x=>x.QuestEndingId==id || x.QuestGiverId==id).ToListAsync();
         }
 
         [HttpPost]

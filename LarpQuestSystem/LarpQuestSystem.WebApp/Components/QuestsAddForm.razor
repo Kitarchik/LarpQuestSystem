@@ -167,7 +167,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _questToAdd = JsonConvert.DeserializeObject<Quest>(jsonTask.Result);
-                ChangeQuests();
+                await ChangeQuests();
                 _questToAdd = new Quest();
                 _showForm = false;
                 StateHasChanged();
@@ -184,9 +184,10 @@ else
 
     }
 
-    private void ChangeQuests()
+    private async Task ChangeQuests()
     {
-        Quests.Add(_questToAdd);
+        var newQuest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{_questToAdd.Id}");
+        Quests.Add(newQuest);
         OnQuestsChange?.Invoke(Quests);
     }
 

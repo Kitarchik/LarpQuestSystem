@@ -71,8 +71,7 @@ else
         _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
         _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
         _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
-        _initialQuestChains = await Http.GetJsonAsync<List<QuestChain>>($"{BaseApiUrl}/questChains/byChainId/{ChainId}");
-        _initialQuestChains = _initialQuestChains.OrderBy(x => x.StepNumber).ToList();
+        _initialQuestChains = _chain.QuestChains.OrderBy(x => x.StepNumber).ToList();
         _selectedQuests = _initialQuestChains.Select(x => _quests.FirstOrDefault(x1 => x1.Id == x.QuestId)).ToList();
     }
 

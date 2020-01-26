@@ -95,7 +95,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _locationToAdd = JsonConvert.DeserializeObject<Location>(jsonTask.Result);
-                ChangeLocations();
+                await ChangeLocations();
                 _locationToAdd = new Location();
                 _showForm = false;
                 StateHasChanged();
@@ -111,9 +111,10 @@ else
         }
     }
 
-    private void ChangeLocations()
+    private async Task ChangeLocations()
     {
-        Locations.Add(_locationToAdd);
+        var newLocation = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{_locationToAdd.Id}");
+        Locations.Add(newLocation);
         OnLocationsChange?.Invoke(Locations);
     }
 }

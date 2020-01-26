@@ -20,11 +20,10 @@ else
         <button class="btn btn-primary" @onclick="EditLocation">Редактировать локацию</button>
         <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
     </div>
-    if (_npcs.Any())
+    if (_location.Npcs.Any())
     {
-        <p><em>Список НПС этой локации</em></p>
         <CascadingValue Value=@_npcs>
-            <NpcsTable />
+            <NpcsShortTable />
         </CascadingValue>
     }
 }
@@ -32,25 +31,23 @@ else
 @code {
     private string _message = "Загрузка...";
     private Location _location;
-    private List<Npc> _npcs;
+    private List<Npc> _npcs { get; set; }
 
     [Parameter]
     public int LocationId { get; set; }
 
-    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
-
+    [CascadingParameter(Name = "BaseApiUrl")] 
+    protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         _location = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{LocationId}");
-        var allNpcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
-        _npcs = allNpcs.Where(x => x.LocationId == LocationId).ToList();
-
+        _npcs = _location.Npcs.ToList();
     }
 
     private async Task DeleteLocation()
     {
-        if (_npcs.Any())
+        if (_location.Npcs.Any())
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "А как же НПС, живущие в этой локации? Удалите сначала их.");
@@ -77,5 +74,10 @@ else
     private void EditLocation()
     {
         NavigationManager.NavigateTo($"/locations/edit/{LocationId}");
+    }
+
+    private void NavigateToNpcView(int npcId)
+    {
+        NavigationManager.NavigateTo($"/npcs/{npcId}");
     }
 }

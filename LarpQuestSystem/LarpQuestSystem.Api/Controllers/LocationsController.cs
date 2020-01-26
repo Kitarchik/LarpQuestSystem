@@ -2,7 +2,6 @@
 using LarpQuestSystem.Data.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,10 +25,20 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.Locations.ToListAsync();
         }
 
+        [HttpGet("full")]
+        public async Task<ActionResult<IEnumerable<Location>>> GetFull()
+        {
+            return await _db.Locations
+                .Include(x => x.Npcs)
+                .ToListAsync();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> Get(int id)
         {
-            Location location = await _db.Locations.FirstOrDefaultAsync(x => x.Id == id);
+            Location location = await _db.Locations
+                .Include(x => x.Npcs)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (location == null)
                 return NotFound();
             return new ObjectResult(location);

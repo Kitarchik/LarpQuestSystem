@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 
 namespace LarpQuestSystem.Api
 {
@@ -22,7 +23,8 @@ namespace LarpQuestSystem.Api
         {
             var connection = Configuration.GetConnectionString("QuestDatabase");
             services.AddDbContext<QuestContext>(options => options.UseSqlServer(connection));
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options => { 
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; });
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",

@@ -39,8 +39,6 @@
         <tr>
             <th>Название квеста</th>
             <th>Цепочки</th>
-            <th>Квестодатель</th>
-            <th>Квестоприниматель</th>
             <th>Сюжетный текст</th>
             <th>Технический текст</th>
             <th>Сложность</th>
@@ -53,8 +51,6 @@
             <tr @onclick="(() => NavigateToQuestView(quest.Id))">
                 <td>@quest.Name</td>
                 <td>@GetChainString(quest)</td>
-                <td>@quest.QuestGiver.Name</td>
-                <td>@quest.QuestEnding.Name</td>
                 <td>
                     @if (quest.IsArtisticTextReady)
                     {

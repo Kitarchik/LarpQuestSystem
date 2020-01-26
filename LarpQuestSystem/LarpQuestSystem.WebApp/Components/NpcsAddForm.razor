@@ -115,7 +115,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _npcToAdd = JsonConvert.DeserializeObject<Npc>(jsonTask.Result);
-                ChangeNpcs();
+                await ChangeNpcs();
                 _npcToAdd = new Npc();
                 _showForm = false;
                 StateHasChanged();
@@ -131,9 +131,10 @@ else
         }
     }
 
-    private void ChangeNpcs()
+    private async Task ChangeNpcs()
     {
-        Npcs.Add(_npcToAdd);
+        var newNpc = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{_npcToAdd.Id}");
+        Npcs.Add(newNpc);
         OnNpcsChange?.Invoke(Npcs);
     }
 }

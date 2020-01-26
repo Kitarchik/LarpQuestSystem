@@ -34,18 +34,6 @@ namespace LarpQuestSystem.Api.Controllers
             return new ObjectResult(questChain);
         }
 
-        [HttpGet("byQuestId/{questId}")]
-        public async Task<ActionResult<IEnumerable<QuestChain>>> GetByQuestId(int questId)
-        {
-            return await _db.QuestChains.Where(x => x.QuestId == questId).ToListAsync();
-        }
-
-        [HttpGet("byChainId/{chainId}")]
-        public async Task<ActionResult<IEnumerable<QuestChain>>> GetByChainId(int chainId)
-        {
-            return await _db.QuestChains.Where(x => x.ChainId == chainId).ToListAsync();
-        }
-
         [HttpPost]
         public async Task<ActionResult<QuestChain>> Post(QuestChain questChain)
         {

@@ -25,10 +25,32 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.Npcs.ToListAsync();
         }
 
+        [HttpGet("full")]
+        public async Task<ActionResult<IEnumerable<Npc>>> GetFull()
+        {
+            return await _db.Npcs
+                .Include(x=>x.Location)
+                .Include(x=>x.StartingQuests)
+                .ThenInclude(x=>x.QuestChains)
+                .ThenInclude(x=>x.Chain)
+                .Include(x=>x.EndingQuests)
+                .ThenInclude(x => x.QuestChains)
+                .ThenInclude(x => x.Chain)
+                .ToListAsync();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Npc>> Get(int id)
         {
-            Npc npc = await _db.Npcs.FirstOrDefaultAsync(x => x.Id == id);
+            Npc npc = await _db.Npcs
+                .Include(x=>x.Location)
+                .Include(x => x.StartingQuests)
+                .ThenInclude(x => x.QuestChains)
+                .ThenInclude(x => x.Chain)
+                .Include(x => x.EndingQuests)
+                .ThenInclude(x => x.QuestChains)
+                .ThenInclude(x => x.Chain)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (npc == null)
                 return NotFound();
             return new ObjectResult(npc);

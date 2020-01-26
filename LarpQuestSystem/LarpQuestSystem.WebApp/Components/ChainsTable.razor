@@ -6,6 +6,7 @@
     <thead>
         <tr>
             <th>Имя цепочки</th>
+            <th>Количество шагов</th>
             <th>Описание</th>
         </tr>
     </thead>
@@ -14,6 +15,7 @@
         {
             <tr @onclick="(() => NavigateToChainView(chain.Id))">
                 <td>@chain.Name</td>
+                <td>@chain.QuestChains.Count</td>
                 <td>@chain.Description</td>
             </tr>
         }

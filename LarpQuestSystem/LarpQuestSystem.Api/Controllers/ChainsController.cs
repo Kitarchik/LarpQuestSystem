@@ -25,10 +25,22 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.Chains.ToListAsync();
         }
 
+        [HttpGet("full")]
+        public async Task<ActionResult<IEnumerable<Chain>>> GetFull()
+        {
+            return await _db.Chains
+                .Include(x=>x.QuestChains)
+                .ThenInclude(x=>x.Quest)
+                .ToListAsync();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Chain>> Get(int id)
         {
-            Chain chain = await _db.Chains.FirstOrDefaultAsync(x => x.Id == id);
+            Chain chain = await _db.Chains
+                .Include(x => x.QuestChains)
+                .ThenInclude(x => x.Quest)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (chain == null)
                 return NotFound();
             return new ObjectResult(chain);

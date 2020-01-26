@@ -16,23 +16,24 @@ else
 {
     <p><em>Имя: @_npc.Name</em></p>
     <p><em>Описание: @_npc.Description</em></p>
-    <p><em>Локация: @_location.Name</em></p>
+    <p><em>Локация: @_npc.Location.Name</em></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="EditNpc">Редактировать НПС</button>
         <button class="btn btn-primary" @onclick="DeleteNpc">Удалить НПС</button>
     </div>
-    if (QuestsToGive.Any())
+    if (_npc.StartingQuests.Any())
     {
         <p><em>Список выдаваемых квестов</em></p>
-        <CascadingValue Value=@QuestsToGive>
-            <QuestTable Npcs="@Npcs" />
+        <CascadingValue Value=@startingQuests>
+            <QuestsShortTable />
         </CascadingValue>
     }
-    if (QuestsToEnd.Any())
+    if (_npc.EndingQuests.Any())
     {
+        <hr/>
         <p><em>Список завершаемых квестов</em></p>
-        <CascadingValue Value=@QuestsToEnd>
-            <QuestTable Npcs="@Npcs" />
+        <CascadingValue Value=@endingQuests>
+            <QuestsShortTable />
         </CascadingValue>
     }
 }
@@ -40,10 +41,8 @@ else
 @code {
     private string _message = "Загрузка...";
     private Npc _npc;
-    private Location _location;
-    private List<Quest> QuestsToGive { get; set; }
-    private List<Quest> QuestsToEnd { get; set; }
-    private List<Npc> Npcs { get; set; }
+    private List<Quest> startingQuests { get; set; }
+    private List<Quest> endingQuests { get; set; }
 
     [Parameter]
     public int NpcId { get; set; }
@@ -52,17 +51,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        Npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
-        _npc = Npcs.FirstOrDefault(x => x.Id == NpcId);
-        _location = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{_npc.LocationId}");
-        var allQuests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests/forNpc/{NpcId}");
-        QuestsToGive = allQuests.Where(x => x.QuestGiverId == NpcId).ToList();
-        QuestsToEnd = allQuests.Where(x => x.QuestEndingId == NpcId).ToList();
+        _npc = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{NpcId}");
+        startingQuests = _npc.StartingQuests.ToList();
+        endingQuests = _npc.EndingQuests.ToList();
     }
 
     private async Task DeleteNpc()
     {
-        if (QuestsToEnd.Any() || QuestsToGive.Any())
+        if (_npc.StartingQuests.Any() || _npc.EndingQuests.Any())
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "ЭЭЭ! Он же квестами занимается! Удали сначала квесты.");
