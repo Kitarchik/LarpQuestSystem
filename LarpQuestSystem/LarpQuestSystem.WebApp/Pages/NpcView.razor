@@ -23,28 +23,39 @@ else
     </div>
     if (_npc.StartingQuests.Any())
     {
-        <h2>Список выдаваемых квестов</h2>
-        <CascadingValue Value=@startingQuests>
-            <QuestsShortTable />
-        </CascadingValue>
+        <br />
+        <br />
+        <hr />
+        <h2>Список выдаваемых квестов <button class="btn btn-primary" @onclick="@ToggleStartingQuestsTable">@(!_hideStartingQuestTable ? "Скрыть" : "Показать")</button> </h2>
+        @if (!_hideStartingQuestTable)
+        {
+            <CascadingValue Value=@StartingQuests>
+                <QuestsShortTable />
+            </CascadingValue>
+        }
     }
     if (_npc.EndingQuests.Any())
     {
-        <br/>
-        <br/>
-        <hr/>
-        <h2>Список завершаемых квестов</h2>
-        <CascadingValue Value=@endingQuests>
-            <QuestsShortTable />
-        </CascadingValue>
+        <br />
+        <br />
+        <hr />
+        <h2>Список завершаемых квестов <button class="btn btn-primary" @onclick="@ToggleEndingQuestsTable">@(!_hideEndingQuestTable ? "Скрыть" : "Показать")</button> </h2>
+        @if (!_hideEndingQuestTable)
+        {
+            <CascadingValue Value=@EndingQuests>
+                <QuestsShortTable />
+            </CascadingValue>
+        }
     }
 }
 
 @code {
     private string _message = "Загрузка...";
     private Npc _npc;
-    private List<Quest> startingQuests { get; set; }
-    private List<Quest> endingQuests { get; set; }
+    private List<Quest> StartingQuests { get; set; }
+    private List<Quest> EndingQuests { get; set; }
+    private bool _hideStartingQuestTable;
+    private bool _hideEndingQuestTable;
 
     [Parameter]
     public int NpcId { get; set; }
@@ -54,8 +65,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         _npc = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{NpcId}");
-        startingQuests = _npc.StartingQuests.ToList();
-        endingQuests = _npc.EndingQuests.ToList();
+        StartingQuests = _npc.StartingQuests.ToList();
+        EndingQuests = _npc.EndingQuests.ToList();
+        _hideStartingQuestTable = false;
+        _hideEndingQuestTable = false;
     }
 
     private async Task DeleteNpc()
@@ -84,6 +97,18 @@ else
     private void EditNpc()
     {
         NavigationManager.NavigateTo($"/npcs/edit/{NpcId}");
+    }
+
+    private void ToggleStartingQuestsTable()
+    {
+        _hideStartingQuestTable = !_hideStartingQuestTable;
+        StateHasChanged();
+    }
+
+    private void ToggleEndingQuestsTable()
+    {
+        _hideEndingQuestTable = !_hideEndingQuestTable;
+        StateHasChanged();
     }
 
 }
