@@ -29,10 +29,16 @@ else
             </div>
         </div>
         <div class="form-group row">
+            <label for="txtQuestGiverFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
+            <div class="col-sm-10">
+                <input type="text" id="txtQuestGiverFilter" @bind-value="@QuestGiverFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="txtQuestGiverName" class="col-sm-2 col-form-label">НПС выдающий квест</label>
             <div class="col-sm-10">
-                <select id="txtQuestGiverName" @bind="@_questToAdd.QuestGiverId">
-                    @foreach (var npcGiver in _npcsGivers)
+                <select id="txtQuestGiverName" size="5" @bind="@_questToAdd.QuestGiverId">
+                    @foreach (var npcGiver in _filteredNpcsGivers)
                     {
                         <option value="@npcGiver.Id">@npcGiver.Name</option>
                     }
@@ -40,10 +46,16 @@ else
             </div>
         </div>
         <div class="form-group row">
+            <label for="txtQuestEndingFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
+            <div class="col-sm-10">
+                <input type="text" id="txtQuestEndingFilter" @bind-value="@QuestEndingFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="txtQuestEndingName" class="col-sm-2 col-form-label">НПС принимающий квест</label>
             <div class="col-sm-10">
-                <select id="txtQuestEndingName" @bind="@_questToAdd.QuestEndingId">
-                    @foreach (var npcEnder in _npcsEndings)
+                <select id="txtQuestEndingName" size="5" @bind="@_questToAdd.QuestEndingId">
+                    @foreach (var npcEnder in _filteredNpcsEndings)
                     {
                         <option value="@npcEnder.Id">@npcEnder.Name</option>
                     }
@@ -103,13 +115,51 @@ else
     private Quest _questToAdd;
     private bool _showForm;
     private List<Npc> _npcsGivers;
+    private List<Npc> _filteredNpcsGivers;
     private List<Npc> _npcsEndings;
+    private List<Npc> _filteredNpcsEndings;
+    private string _questGiverFilter = string.Empty;
+    private string _questEndingFilter = string.Empty;
+
+    public string QuestGiverFilter
+    {
+        get => _questGiverFilter;
+        set
+        {
+            _questGiverFilter = value;
+            FilterNpcs();
+        }
+    }
+
+    public string QuestEndingFilter
+    {
+        get => _questEndingFilter;
+        set
+        {
+            _questEndingFilter = value;
+            FilterNpcs();
+        }
+    }
+
+    private void FilterNpcs()
+    {
+        _filteredNpcsGivers = _npcsGivers
+            .Where(x => x.Name.Contains(QuestGiverFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        _filteredNpcsEndings = _npcsEndings
+            .Where(x => x.Name.Contains(QuestEndingFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         _questToAdd = new Quest();
         _npcsGivers = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
         _npcsEndings = _npcsGivers;
+        _filteredNpcsGivers = _npcsGivers;
+        _filteredNpcsEndings = _npcsEndings;
     }
 
     private void ShowForm()
@@ -133,14 +183,14 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (_questToAdd.QuestGiverId < 1)
+        else if (_questToAdd.QuestGiverId < 1 || !_filteredNpcsGivers.Exists(x => x.Id == _questToAdd.QuestGiverId))
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Укажите кто выдает квест.");
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (_questToAdd.QuestEndingId < 1)
+        else if (_questToAdd.QuestEndingId < 1 || !_filteredNpcsEndings.Exists(x => x.Id == _questToAdd.QuestEndingId))
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Укажите кто принимает квест.");

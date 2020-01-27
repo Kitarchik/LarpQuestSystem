@@ -23,15 +23,17 @@ else
     </div>
     if (_npc.StartingQuests.Any())
     {
-        <p><em>Список выдаваемых квестов</em></p>
+        <h2>Список выдаваемых квестов</h2>
         <CascadingValue Value=@startingQuests>
             <QuestsShortTable />
         </CascadingValue>
     }
     if (_npc.EndingQuests.Any())
     {
+        <br/>
+        <br/>
         <hr/>
-        <p><em>Список завершаемых квестов</em></p>
+        <h2>Список завершаемых квестов</h2>
         <CascadingValue Value=@endingQuests>
             <QuestsShortTable />
         </CascadingValue>

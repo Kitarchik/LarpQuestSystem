@@ -12,10 +12,13 @@
 }
 else
 {
-    <CascadingValue Value=@_chains>
-        <ChainsAddForm OnChainsChange="@ChangeChains" />
-        <ChainsTable />
-    </CascadingValue>
+<CascadingValue Value=@_chains>
+    <ChainsAddForm OnChainsChange="@ChangeChains" />
+    <br />
+    <br />
+    <hr/>
+    <ChainsTable />
+</CascadingValue>
 }
 
 @code {

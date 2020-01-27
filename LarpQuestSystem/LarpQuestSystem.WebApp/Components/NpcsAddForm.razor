@@ -29,10 +29,16 @@ else
             </div>
         </div>
         <div class="form-group row">
+            <label for="txtLocationFilter" class="col-sm-2 col-form-label">Фильтр локаций: </label>
+            <div class="col-sm-10">
+                <input type="text" id="txtLocationFilter" @bind-value="@LocationFilter" @bind-value:event="oninput" placeholder="Название локации" />
+            </div>
+        </div>
+        <div class="form-group row">
             <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
             <div class="col-sm-10">
-                <select id="txtNpcLocation" @bind="_npcToAdd.LocationId">
-                    @foreach (var location in _locations)
+                <select id="txtNpcLocation" size="5" @bind="_npcToAdd.LocationId">
+                    @foreach (var location in _filteredLocations)
                     {
                         <option value="@location.Id">@location.Name</option>
                     }
@@ -57,14 +63,34 @@ else
     public Action<List<Npc>> OnNpcsChange { get; set; }
 
     private List<Location> _locations { get; set; }
-
+    private List<Location> _filteredLocations { get; set; }
     private Npc _npcToAdd;
     private bool _showForm;
+    private string _locationFilter = string.Empty;
+
+    public string LocationFilter
+    {
+        get => _locationFilter;
+        set
+        {
+            _locationFilter = value;
+            FilterLocations();
+        }
+    }
+
+    private void FilterLocations()
+    {
+        _filteredLocations = _locations
+            .Where(x => x.Name.Contains(LocationFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         _npcToAdd = new Npc();
         _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
+        _filteredLocations = _locations;
     }
 
     private void ShowForm()
@@ -88,7 +114,7 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (_npcToAdd.LocationId < 1)
+        else if (_npcToAdd.LocationId < 1 || !_filteredLocations.Exists(x => x.Id == _npcToAdd.LocationId))
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Выберите локацию.");

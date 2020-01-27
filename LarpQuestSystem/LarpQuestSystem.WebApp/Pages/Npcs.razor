@@ -14,6 +14,9 @@ else
 {
     <CascadingValue Value=@_npcs>
         <NpcsAddForm OnNpcsChange="ChangeNpcs" />
+        <br />
+        <br />
+        <hr />
         <NpcsTable />
     </CascadingValue>
 }
@@ -22,7 +25,7 @@ else
     private List<Npc> _npcs { get; set; }
     private string _message = "Загрузка...";
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

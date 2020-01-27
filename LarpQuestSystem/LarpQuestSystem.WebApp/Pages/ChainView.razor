@@ -15,7 +15,15 @@
 else
 {
     <p><em>Название: @_chain.Name</em></p>
-    <p><em>Описание: @_chain.Description</em></p>                                  
+    <p><em>Описание: @_chain.Description</em></p>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
+        <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
+    </div>
+    <br />
+    <br />
+    <hr />
+    <h2>Шаги цепочки</h2>
     <table class="table">
         <thead>
             <tr>
@@ -33,10 +41,6 @@ else
             }
         </tbody>
     </table>
-    <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
-        <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
-    </div>
 }
 
 @code
@@ -47,7 +51,7 @@ else
     [Parameter]
     public int ChainId { get; set; }
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
