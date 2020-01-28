@@ -28,17 +28,15 @@ else
     </div>
     @if (_selectedQuests != null)
     {
-
         @for (int i = 0; i < _selectedQuests.Count; i++)
         {
             <div class="form-group row">
-                <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+                <div class="col-sm-10">
+                    <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+                </div>
             </div>
         }
-
     }
-
-
     <div class="form-group row">
         <label for="txtQuestFilter" class="col-sm-2 col-form-label">Фильтр</label>
         <div class="col-sm-10">
@@ -49,7 +47,7 @@ else
         <label for="selectNextQuest" class="col-sm-2 col-form-label">Выберите следующий квест: </label>
         <div class="col-sm-10">
             <select id="selectNextQuest" size="5" @onchange="@SelectQuest">
-                @foreach (var quest in FilteredQuests)
+                @foreach (var quest in _filteredQuests)
                 {
                     <option value="@quest.Id">@quest.Name</option>
                 }
@@ -77,7 +75,7 @@ else
     public Action<List<Chain>> OnChainsChange { get; set; }
 
     private List<Quest> Quests { get; set; }
-    private List<Quest> FilteredQuests;
+    private List<Quest> _filteredQuests;
 
     private List<Quest> _selectedQuests;
     private bool _showForm;
@@ -97,7 +95,7 @@ else
 
     private void FilterQuests()
     {
-        FilteredQuests = Quests
+        _filteredQuests = Quests
             .Where(x => x.Name.Contains(QuestFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
         StateHasChanged();
@@ -108,7 +106,7 @@ else
         _chain = new Chain();
         _selectedQuests = new List<Quest>();
         Quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
-        FilteredQuests = Quests;
+        _filteredQuests = Quests;
         if (Quests.Any())
         {
             _selectedQuest = Quests.First(x => x.Id == Quests.Select(x1 => x1.Id).Min());
@@ -154,7 +152,6 @@ else
     {
         var questId = int.Parse(e.Value.ToString());
         _selectedQuest = Quests.FirstOrDefault(x => x.Id == questId);
-
     }
 
     protected async Task Submit()
@@ -197,6 +194,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _chain = JsonConvert.DeserializeObject<Chain>(jsonTask.Result);
+                _chain.QuestChains = new List<QuestChain>();
                 for (int i = 0; i < _selectedQuests.Count; i++)
                 {
                     var questChain = new QuestChain
@@ -205,6 +203,7 @@ else
                         StepNumber = i + 1,
                         QuestId = _selectedQuests[i].Id,
                     };
+                    _chain.QuestChains.Add(questChain);
                     await Http.PostJsonAsync<QuestChain>($"{BaseApiUrl}/questChains", questChain);
                 }
                 ChangeChains();

@@ -18,7 +18,8 @@ else
         <br />
         <br />
         <hr />
-        <NpcsTable />
+        <h2>Таблица НПС</h2>
+        <NpcsShortTable />
     </CascadingValue>
 }
 
@@ -30,7 +31,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs/full");
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
     }
 
     private void ChangeNpcs(List<Npc> npcs)

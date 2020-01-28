@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LarpQuestSystem.Data.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    [Migration("20200128131900_AddedPlayersTable")]
-    partial class AddedPlayersTable
+    [Migration("20200128151139_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -137,17 +137,22 @@ namespace LarpQuestSystem.Data.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasMaxLength(2000);
 
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LocationId");
+
                     b.HasIndex("Name")
                         .IsUnique()
                         .HasFilter("[Name] IS NOT NULL");
 
-                    b.ToTable("Player");
+                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Quest", b =>
@@ -287,6 +292,15 @@ namespace LarpQuestSystem.Data.Migrations
                 {
                     b.HasOne("LarpQuestSystem.Data.Model.Location", "Location")
                         .WithMany("Npcs")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LarpQuestSystem.Data.Model.Player", b =>
+                {
+                    b.HasOne("LarpQuestSystem.Data.Model.Location", "Location")
+                        .WithMany("Players")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

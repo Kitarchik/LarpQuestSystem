@@ -1,6 +1,8 @@
 ﻿@page "/quests/{QuestId:int}"
 @using LarpQuestSystem.Data.Model
 @using LarpQuestSystem.WebApp.Components.Utils
+@using LarpQuestSystem.WebApp.Components.Players
+@using LarpQuestSystem.WebApp.Components.Chains
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -21,7 +23,7 @@ else
         <em>Художественный текст: @GetStatus(_quest.IsArtisticTextReady)</em>
         @if (!string.IsNullOrEmpty(_quest.ArtisticTextLink))
         {
-            <button class="btn btn-primary" @onclick="EditArtisticTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
+            <button class="btn btn-primary" @onclick="@EditArtisticTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
             <button class="btn btn-primary" @onclick="@ChangeArtisticTextStatus"> Сменить статус </button>
         }
     </p>
@@ -29,7 +31,7 @@ else
         <em>Техническое описание: @GetStatus(_quest.IsTechnicalDescriptionReady)</em>
         @if (!string.IsNullOrEmpty(_quest.TechnicalDescriptionLink))
         {
-            <button class="btn btn-primary" @onclick="EditTechnicalTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
+            <button class="btn btn-primary" @onclick="@EditTechnicalTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
             <button class="btn btn-primary" @onclick="@ChangeTechnicalTextStatus"> Сменить статус </button>
         }
     </p>
@@ -51,34 +53,36 @@ else
         <br />
         <br />
         <hr />
-        <h2>Таблица цепочек квеста</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Цепочка квестов</th>
-                    <th>Шаг</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var questChain in _quest.QuestChains)
-                {
-                    <tr @onclick="(() => NavigateToChainView(questChain.ChainId))">
-                        <td>@questChain.Chain.Name</td>
-                        <td>@questChain.StepNumber</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <h2>Цепочки, в которых участвует квест <button class="btn btn-primary" @onclick="@ToggleChainsTable">@(!_hideChainsTable ? "Скрыть" : "Показать")</button></h2>
+        @if (!_hideChainsTable)
+        {
+            <CascadingValue Value=@_chains>
+                <ChainsTable />
+            </CascadingValue>
+        }
     }
-    else
+    @if (_quest.QuestPlayers.Any())
     {
-        <p><em>Квест не участвует в цепочках.</em></p>
+        <br />
+        <br />
+        <hr />
+        <h2>Игроки, получившие этот квест.<button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button></h2>
+        @if (!_hidePlayersTable)
+        {
+            <CascadingValue Value=@_players>
+                <PlayersTable />
+            </CascadingValue>
+        }
     }
 }
 
 @code {
     private string _message = "Загрузка...";
     private Quest _quest;
+    private List<Player> _players;
+    private List<Chain> _chains;
+    private bool _hideChainsTable;
+    private bool _hidePlayersTable;
 
     [Parameter]
     public int QuestId { get; set; }
@@ -88,6 +92,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
+        _players = _quest.QuestPlayers.Select(x => x.Player).ToList();
+        _chains = _quest.QuestChains.Select(x => x.Chain).ToList();
+        _hidePlayersTable = false;
+        _hideChainsTable = false;
     }
 
     private async Task DeleteQuest()
@@ -101,6 +109,10 @@ else
         }
         else
         {
+            foreach (var questPlayers in _quest.QuestPlayers)
+            {
+                await Http.DeleteAsync($"{BaseApiUrl}/questPlayers/{questPlayers.Id}");
+            }
             var response = await Http.DeleteAsync($"{BaseApiUrl}/quests/{QuestId}");
             if (response.IsSuccessStatusCode)
             {
@@ -169,9 +181,16 @@ else
         StateHasChanged();
     }
 
-    private void NavigateToChainView(int chainId)
+    private void ToggleChainsTable()
     {
-        NavigationManager.NavigateTo($"/chains/{chainId}");
+        _hideChainsTable = !_hideChainsTable;
+        StateHasChanged();
+    }
+
+    private void TogglePlayersTable()
+    {
+        _hidePlayersTable = !_hidePlayersTable;
+        StateHasChanged();
     }
 
     private void EditQuest()

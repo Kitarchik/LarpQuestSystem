@@ -1,13 +1,11 @@
 ﻿@using LarpQuestSystem.Data.Model
 @inject NavigationManager NavigationManager
 
-<h2>Таблица цепочек</h2>
 <input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Имя цепочки квестов" />
 <table class="table">
     <thead>
         <tr>
             <th>Имя цепочки</th>
-            <th>Количество шагов</th>
             <th>Описание</th>
         </tr>
     </thead>
@@ -16,7 +14,6 @@
         {
             <tr @onclick="(() => NavigateToChainView(chain.Id))">
                 <td>@chain.Name</td>
-                <td>@chain.QuestChains.Count</td>
                 <td>@chain.Description</td>
             </tr>
         }

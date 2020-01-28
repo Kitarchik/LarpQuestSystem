@@ -19,7 +19,8 @@ else
         <br/>
         <br/>
         <hr/>
-        <QuestTable />
+        <h2>Таблица квестов</h2>
+        <QuestsShortTable />
     </CascadingValue>
 }
 
@@ -31,7 +32,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests/full");
+        _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
     }
 
     private void ChangeQuests(List<Quest> quests)

@@ -1,0 +1,168 @@
+﻿@using System.Net
+@using LarpQuestSystem.Data.Model
+@using Newtonsoft.Json
+@using LarpQuestSystem.WebApp.Components.Utils
+
+@inject HttpClient Http
+@inject IModalService Modal
+
+@if (!_showForm)
+{
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@ShowForm">Создать Игрока/Команду</button>
+    </div>
+}
+else
+{
+    <EditForm Model="@_playerToAdd" OnValidSubmit="@Submit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="form-group row">
+            <label for="txtPlayerName" class="col-sm-2 col-form-label">Имя игрока</label>
+            <div class="col-sm-10">
+                <InputText id="txtPlayerName" class="form-control" @bind-Value="@_playerToAdd.Name"></InputText>
+                <ValidationMessage For="@(() => _playerToAdd.Name)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtPlayerDescription" class="col-sm-2 col-form-label">Описание</label>
+            <div class="col-sm-10">
+                <textarea class="form-control" id="txtPlayerDescription" rows="5" @bind="@_playerToAdd.Description"></textarea>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtLocationFilter" class="col-sm-2 col-form-label">Фильтр локаций: </label>
+            <div class="col-sm-10">
+                <input type="text" id="txtLocationFilter" @bind-value="@LocationFilter" @bind-value:event="oninput" placeholder="Название локации" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
+            <div class="col-sm-10">
+                <select id="txtNpcLocation" size="5" @bind="_playerToAdd.LocationId">
+                    @foreach (var location in FilteredLocations)
+                    {
+                        <option value="@location.Id">@location.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <button class="btn btn-primary" @onclick="@HideForm">Отмена</button>
+        </div>
+    </EditForm>
+}
+
+@code
+{
+    [CascadingParameter]
+    private List<Player> Players { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    [Parameter]
+    public Action<List<Player>> OnPlayersChange { get; set; }
+
+    private List<Location> Locations { get; set; }
+    private List<Location> FilteredLocations { get; set; }
+    private Player _playerToAdd;
+    private bool _showForm;
+    private string _locationFilter = string.Empty;
+
+    public string LocationFilter
+    {
+        get => _locationFilter;
+        set
+        {
+            _locationFilter = value;
+            FilterLocations();
+        }
+    }
+
+    private void FilterLocations()
+    {
+        FilteredLocations = Locations
+            .Where(x => x.Name.Contains(LocationFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _playerToAdd = new Player();
+        Locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
+        FilteredLocations = Locations;
+    }
+
+    private void ShowForm()
+    {
+        _showForm = true;
+        StateHasChanged();
+    }
+
+    private void HideForm()
+    {
+        _showForm = false;
+        StateHasChanged();
+    }
+
+    protected async Task Submit()
+    {
+        if (string.IsNullOrEmpty(_playerToAdd.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_playerToAdd.LocationId < 1 || !FilteredLocations.Exists(x => x.Id == _playerToAdd.LocationId))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Выберите локацию.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var requestMessage = new HttpRequestMessage()
+            {
+                Method = new HttpMethod("POST"),
+                RequestUri = new Uri($"{BaseApiUrl}/players"),
+                Content =
+                    new StringContent(JsonConvert.SerializeObject(_playerToAdd)),
+            };
+
+            requestMessage.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(
+                    "application/json");
+
+            var response = await Http.SendAsync(requestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonTask = response.Content.ReadAsStringAsync();
+                jsonTask.Wait();
+                _playerToAdd = JsonConvert.DeserializeObject<Player>(jsonTask.Result);
+                await ChangeNpcs();
+                _playerToAdd = new Player();
+                _showForm = false;
+                StateHasChanged();
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Игрок с таким именем уже существует.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private async Task ChangeNpcs()
+    {
+        var newPlayer = await Http.GetJsonAsync<Player>($"{BaseApiUrl}/players/{_playerToAdd.Id}");
+        Players.Add(newPlayer);
+        OnPlayersChange?.Invoke(Players);
+    }
+}

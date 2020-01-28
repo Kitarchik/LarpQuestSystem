@@ -27,6 +27,8 @@ namespace LarpQuestSystem.Api.Controllers
                 .Include(x => x.QuestEnding)
                 .Include(x => x.QuestChains)
                 .ThenInclude(x => x.Chain)
+                .Include(x=>x.QuestPlayers)
+                .ThenInclude(x=>x.Player)
                 .ToListAsync();
         }
 
@@ -44,6 +46,9 @@ namespace LarpQuestSystem.Api.Controllers
                 .Include(x => x.QuestEnding)
                 .Include(x => x.QuestChains)
                 .ThenInclude(x=>x.Chain)
+                .Include(x => x.QuestPlayers)
+                .ThenInclude(x => x.Player)
+                .ThenInclude(x => x.Location)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (quest == null)
                 return NotFound();

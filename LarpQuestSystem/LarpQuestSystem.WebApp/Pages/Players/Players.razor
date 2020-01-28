@@ -1,0 +1,42 @@
+﻿@page "/players"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components.Players
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Список Игроков</h1>
+
+@if (_players == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_players>
+        <PlayersAddForm OnPlayersChange="@ChangePlayers" />
+        <br />
+        <br />
+        <hr />
+        <h2>Таблица игроков</h2>
+        <PlayersTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Player> _players { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players/full");
+    }
+
+    private void ChangePlayers(List<Player> players)
+    {
+        _players = players;
+        StateHasChanged();
+    }
+}

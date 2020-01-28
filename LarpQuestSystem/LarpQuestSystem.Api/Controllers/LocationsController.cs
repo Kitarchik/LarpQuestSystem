@@ -25,19 +25,12 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.Locations.ToListAsync();
         }
 
-        [HttpGet("full")]
-        public async Task<ActionResult<IEnumerable<Location>>> GetFull()
-        {
-            return await _db.Locations
-                .Include(x => x.Npcs)
-                .ToListAsync();
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> Get(int id)
         {
             Location location = await _db.Locations
                 .Include(x => x.Npcs)
+                .Include(x=>x.Players)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (location == null)
                 return NotFound();

@@ -12,6 +12,8 @@ namespace LarpQuestSystem.Data
         public DbSet<Npc> Npcs { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Chain> Chains { get; set; }
+        public DbSet<QuestPlayer> QuestPlayers { get; set; }
+        public DbSet<Player> Players { get; set; }
 
         public QuestContext(DbContextOptions<QuestContext> options) : base(options)
         {
@@ -46,6 +48,10 @@ namespace LarpQuestSystem.Data
                 .WithMany(x => x.EndingQuests)
                 .HasForeignKey(x => x.QuestEndingId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Quest>()
+                .HasMany(x => x.QuestPlayers)
+                .WithOne(x => x.Quest)
+                .HasForeignKey(x => x.QuestId);
             modelBuilder.Entity<Chain>()
                 .HasMany(x => x.QuestChains)
                 .WithOne(x => x.Chain)
@@ -63,8 +69,6 @@ namespace LarpQuestSystem.Data
                 .WithMany(x => x.Npcs)
                 .HasForeignKey(x => x.LocationId);
             modelBuilder.Entity<QuestPlayer>()
-                .HasKey(x => new { x.PlayerId, x.QuestId });
-            modelBuilder.Entity<QuestPlayer>()
                 .HasOne(x => x.Quest)
                 .WithMany(x => x.QuestPlayers)
                 .HasForeignKey(x => x.QuestId);
@@ -72,7 +76,10 @@ namespace LarpQuestSystem.Data
                 .HasOne(x => x.Player)
                 .WithMany(x => x.QuestPlayers)
                 .HasForeignKey(x => x.PlayerId);
-
+            modelBuilder.Entity<Player>()
+                .HasOne(x => x.Location)
+                .WithMany(x => x.Players)
+                .HasForeignKey(x => x.LocationId);
 
             modelBuilder.Entity<Chain>()
                 .Property(x => x.Name)

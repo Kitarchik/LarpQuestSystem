@@ -6,9 +6,6 @@
     <div class="col-sm">
         <input type="text" id="filterByName" @bind-value="@NameFilter" @bind-value:event="oninput" placeholder="Название квеста" />
     </div>
-    <div class="col-sm">
-        <input type="text" id="filterByChain" @bind-value="@ChainFilter" @bind-value:event="oninput" placeholder="Название цепочки" />
-    </div>
     <div class="row col-sm">
         <div class="col-sm my-auto">
             <em>Художественный текст: </em>
@@ -50,7 +47,6 @@
     <thead>
         <tr>
             <th>Название квеста</th>
-            <th>Цепочки</th>
             <th>Сюжетный текст</th>
             <th>Технический текст</th>
             <th>Напечатан</th>
@@ -63,7 +59,6 @@
         {
             <tr @onclick="(() => NavigateToQuestView(quest.Id))">
                 <td>@quest.Name</td>
-                <td>@GetChainString(quest)</td>
                 <td>
                     @if (quest.IsArtisticTextReady)
                     {
@@ -105,7 +100,6 @@
 {
     private List<Quest> _filteredQuest;
     private string _nameFilter = string.Empty;
-    private string _chainFilter = string.Empty;
     private int _artisticFilter;
     private int _technicalFilter;
     private int _printFilter;
@@ -119,16 +113,6 @@
         set
         {
             _nameFilter = value;
-            FilterQuests();
-        }
-    }
-
-    public string ChainFilter
-    {
-        get => _chainFilter;
-        set
-        {
-            _chainFilter = value;
             FilterQuests();
         }
     }
@@ -173,7 +157,6 @@
     {
         _filteredQuest = Quests
             .Where(x => x.Name.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase))
-            .Where(x => GetChainString(x).Contains(_chainFilter, StringComparison.OrdinalIgnoreCase))
             .Where(x => (ArtisticFilter == 0) || (x.IsArtisticTextReady == (ArtisticFilter == 1)))
             .Where(x => (TechnicalFilter == 0) || (x.IsTechnicalDescriptionReady == (TechnicalFilter == 1)))
             .Where(x => (PrintFilter == 0) || (x.IsPrinted == (PrintFilter == 1)))
@@ -196,16 +179,6 @@
     {
         var enumValue = (QuestGrade)grade;
         return enumValue.GetStringValue();
-    }
-
-    private string GetChainString(Quest quest)
-    {
-        var result = string.Empty;
-        foreach (var questChain in quest.QuestChains)
-        {
-            result += questChain.Chain.Name + " " + questChain.StepNumber + "\n";
-        }
-        return result;
     }
 
 }

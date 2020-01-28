@@ -1,0 +1,58 @@
+﻿@using LarpQuestSystem.Data.Model
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Имя игрока" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя игрока</th>
+            <th>Описание</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var player in _filteredPlayers)
+        {
+            <tr @onclick="(() => NavigateToPlayerView(player.Id))">
+                <td>@player.Name</td>
+                <td>@player.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<Player> _filteredPlayers;
+    private string _filterString = string.Empty;
+
+    [CascadingParameter]
+    private List<Player> Players { get; set; }
+
+    public string FilterString
+    {
+        get => _filterString;
+        set
+        {
+            _filterString = value;
+            FilterPlayers();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredPlayers = Players;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterPlayers()
+    {
+        _filteredPlayers = Players.Where(x => x.Name.Contains(_filterString, StringComparison.OrdinalIgnoreCase)).ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToPlayerView(int playerId)
+    {
+        NavigationManager.NavigateTo($"/players/{playerId}");
+    }
+
+}

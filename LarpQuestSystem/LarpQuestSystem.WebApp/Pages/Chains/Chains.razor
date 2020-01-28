@@ -17,7 +17,8 @@ else
     <ChainsAddForm OnChainsChange="@ChangeChains" />
     <br />
     <br />
-    <hr/>
+    <hr />
+    <h2>Таблица цепочек</h2>
     <ChainsTable />
 </CascadingValue>
 }
@@ -30,7 +31,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains/full");
+        _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
     }
 
     private void ChangeChains(List<Chain> chains)

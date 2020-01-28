@@ -2,6 +2,7 @@
 @using LarpQuestSystem.Data.Model
 @using LarpQuestSystem.WebApp.Components.Utils
 @using LarpQuestSystem.WebApp.Components.Npcs
+@using LarpQuestSystem.WebApp.Components.Players
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -18,17 +19,34 @@ else
     <p><em>Название: @_location.Name</em></p>
     <p><em>Описание: @_location.Description</em></p>
     <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="EditLocation">Редактировать локацию</button>
+        <button class="btn btn-primary" @onclick="@EditLocation">Редактировать локацию</button>
         <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
     </div>
     if (_location.Npcs.Any())
     {
-        <br/>
-        <br/>
-        <hr/>
-        <CascadingValue Value=@_npcs>
-            <NpcsShortTable />
-        </CascadingValue>
+        <br />
+        <br />
+        <hr />
+        <h2>Список НПС локации <button class="btn btn-primary" @onclick="@ToggleNpcsTable">@(!_hideNpcsTable ? "Скрыть" : "Показать")</button> </h2>
+        @if (!_hideNpcsTable)
+        {
+            <CascadingValue Value=@_npcs>
+                <NpcsShortTable />
+            </CascadingValue>
+        }
+    }
+    if (_location.Players.Any())
+    {
+        <br />
+        <br />
+        <hr />
+        <h2>Список игроков локации <button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button> </h2>
+        @if (!_hideNpcsTable)
+        {
+            <CascadingValue Value=@_players>
+                <PlayersTable />
+            </CascadingValue>
+        }
     }
 }
 
@@ -36,17 +54,23 @@ else
     private string _message = "Загрузка...";
     private Location _location;
     private List<Npc> _npcs { get; set; }
+    private List<Player> _players { get; set; }
+    private bool _hideNpcsTable;
+    private bool _hidePlayersTable;
 
     [Parameter]
     public int LocationId { get; set; }
 
-    [CascadingParameter(Name = "BaseApiUrl")] 
+    [CascadingParameter(Name = "BaseApiUrl")]
     protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         _location = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{LocationId}");
         _npcs = _location.Npcs.ToList();
+        _players = _location.Players.ToList();
+        _hideNpcsTable = false;
+        _hidePlayersTable = false;
     }
 
     private async Task DeleteLocation()
@@ -55,6 +79,13 @@ else
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "А как же НПС, живущие в этой локации? Удалите сначала их.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        if (_location.Players.Any())
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "А как же игроки, живущие в этой локации? Удалите сначала их.");
 
             Modal.Show<Notification>("Notification", parameters);
         }
@@ -80,8 +111,15 @@ else
         NavigationManager.NavigateTo($"/locations/edit/{LocationId}");
     }
 
-    private void NavigateToNpcView(int npcId)
+    private void ToggleNpcsTable()
     {
-        NavigationManager.NavigateTo($"/npcs/{npcId}");
+        _hideNpcsTable = !_hideNpcsTable;
+        StateHasChanged();
+    }
+
+    private void TogglePlayersTable()
+    {
+        _hidePlayersTable = !_hidePlayersTable;
+        StateHasChanged();
     }
 }

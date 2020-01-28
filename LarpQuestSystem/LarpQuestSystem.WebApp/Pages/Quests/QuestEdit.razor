@@ -14,92 +14,123 @@
 }
 else
 {
-    <EditForm Model="@_quest" OnValidSubmit="@Submit">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
-
+    <div class="form-group row">
+        <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtQuestName" class="form-control" @bind="@_quest.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtQuestDescription" rows="5" @bind="@_quest.Description"></textarea>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtArtisticTextLink" class="form-control" @bind="@_quest.ArtisticTextLink" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtTechnicalTextLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtTechnicalTextLink" class="form-control" @bind="@_quest.TechnicalDescriptionLink">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество копий в печать</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtAmountToPrint" class="form-control" @bind="@AmountToPrintString" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestGiverFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
+        <div class="col-sm-10">
+            <input type="text" id="txtQuestGiverFilter" @bind-value="@QuestGiverFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestGiver" class="col-sm-2 col-form-label">НПС выдающий квест</label>
+        <div class="col-sm-10">
+            <select id="txtQuestGiver" size="5" @bind="_quest.QuestGiverId">
+                @foreach (var npc in _filteredNpcsGivers)
+                {
+                    <option value="@npc.Id">@npc.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestEndingFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
+        <div class="col-sm-10">
+            <input type="text" id="txtQuestEndingFilter" @bind-value="@QuestEndingFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestEnding" class="col-sm-2 col-form-label">НПС принимающий квест</label>
+        <div class="col-sm-10">
+            <select id="txtQuestEnding" size="5" @bind="_quest.QuestEndingId">
+                @foreach (var npc in _filteredNpcsEndings)
+                {
+                    <option value="@npc.Id">@npc.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
+        <div class="col-sm-10">
+            <select id="questComplexity" @bind="@_quest.Complexity">
+                @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
+                {
+                    <option value="@complexity">@GetStringComplexityValue(complexity)</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
+        <div class="col-sm-10">
+            <select id="questGrade" @bind="@_quest.Grade">
+                @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
+                {
+                    <option value="@grade">@GetStringGradeValue(grade)</option>
+                }
+            </select>
+        </div>
+    </div>
+    @for (int i = 0; i < _selectedPlayers.Count; i++)
+    {
         <div class="form-group row">
-            <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
-            <div class="col-sm-10">
-                <InputText id="txtQuestName" class="form-control" @bind-Value="@_quest.Name"></InputText>
-                <ValidationMessage For="@(() => _quest.Name)"></ValidationMessage>
-            </div>
+            <p><em>Игрок/Команда: @_selectedPlayers[i].Name</em></p>
         </div>
-        <div class="form-group row">
-            <label for="txtQuestDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtQuestDescription" rows="5" @bind="@_quest.Description"></textarea>
-            </div>
+    }
+    <div class="form-group row">
+        <label for="txtPlayerFilter" class="col-sm-2 col-form-label">Фильтр</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtPlayerFilter" @bind-value="@PlayerFilter" @bind-value:event="oninput" placeholder="Имя игрока" />
         </div>
-        <div class="form-group row">
-            <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
-            <div class="col-sm-10">
-                <InputText id="txtArtisticTextLink" class="form-control" @bind-Value="@_quest.ArtisticTextLink"></InputText>
-                <ValidationMessage For="@(() => _quest.ArtisticTextLink)"></ValidationMessage>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="nextQuest" class="col-sm-2 col-form-label">Добавить игрока/команду</label>
+        <div class="col-sm-10">
+            <select id="nextQuest" size="5" @onchange="@SelectPlayer">
+                @foreach (var player in _filteredPlayers)
+                {
+                    <option value="@player.Id">@player.Name</option>
+                }
+            </select>
         </div>
-        <div class="form-group row">
-            <label for="txtTechnicalTextLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
-            <div class="col-sm-10">
-                <InputText id="txtTechnicalTextLink" class="form-control" @bind-Value="@_quest.TechnicalDescriptionLink"></InputText>
-                <ValidationMessage For="@(() => _quest.TechnicalDescriptionLink)"></ValidationMessage>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество копий в печать</label>
-            <div class="col-sm-10">
-                <InputText id="txtAmountToPrint" class="form-control" @bind-Value="@AmountToPrintString"></InputText>
-                <ValidationMessage For="@(() => _quest.AmountToPrint)"></ValidationMessage>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtQuestGiver" class="col-sm-2 col-form-label">НПС выдающий квест</label>
-            <div class="col-sm-10">
-                <select id="txtQuestGiver" @bind="_quest.QuestGiverId">
-                    @foreach (var npc in _npcs)
-                    {
-                        <option value="@npc.Id">@npc.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtQuestEnding" class="col-sm-2 col-form-label">НПС принимающий квест</label>
-            <div class="col-sm-10">
-                <select id="txtQuestEnding" @bind="_quest.QuestEndingId">
-                    @foreach (var npc in _npcs)
-                    {
-                        <option value="@npc.Id">@npc.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
-            <div class="col-sm-10">
-                <select id="questComplexity" @bind="@_quest.Complexity">
-                    @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
-                    {
-                        <option value="@complexity">@GetStringComplexityValue(complexity)</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
-            <div class="col-sm-10">
-                <select id="questGrade" @bind="@_quest.Grade">
-                    @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
-                    {
-                        <option value="@grade">@GetStringGradeValue(grade)</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
-        </div>
-    </EditForm>
+    </div>
+    <div class="form-group row">
+        <button class="btn btn-primary" @onclick="@AddPlayer">Добавить игрока</button>
+        <button class="btn btn-primary" @onclick="@DeletePlayer">Убрать игрока</button>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
 }
 
 @code {
@@ -107,18 +138,86 @@ else
     private Quest _quest;
     private List<Quest> _quests;
     private List<Npc> _npcs;
-    private string AmountToPrintString = string.Empty;
+    private List<Npc> _filteredNpcsGivers;
+    private List<Npc> _filteredNpcsEndings;
+    private string _questGiverFilter = string.Empty;
+    private string _questEndingFilter = string.Empty;
+    private List<QuestPlayer> _initialQuestPlayers;
+    private List<Player> _selectedPlayers;
+    private List<Player> _players;
+    private Player _selectedPlayer;
+    private string AmountToPrintString;
+    private string _playerFilter = string.Empty;
+    private List<Player> _filteredPlayers;
 
     [Parameter]
     public int QuestId { get; set; }
 
     [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
+    public string PlayerFilter
+    {
+        get => _playerFilter;
+        set
+        {
+            _playerFilter = value;
+            FilterPlayers();
+        }
+    }
+
+    public string QuestGiverFilter
+    {
+        get => _questGiverFilter;
+        set
+        {
+            _questGiverFilter = value;
+            FilterNpcs();
+        }
+    }
+
+    public string QuestEndingFilter
+    {
+        get => _questEndingFilter;
+        set
+        {
+            _questEndingFilter = value;
+            FilterNpcs();
+        }
+    }
+
+    private void FilterNpcs()
+    {
+        _filteredNpcsGivers = _npcs
+            .Where(x => x.Name.Contains(QuestGiverFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        _filteredNpcsEndings = _npcs
+            .Where(x => x.Name.Contains(QuestEndingFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        StateHasChanged();
+    }
+
+    private void FilterPlayers()
+    {
+        _filteredPlayers = _players
+            .Where(x => x.Name.Contains(PlayerFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        StateHasChanged();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
-        _quest = _quests.FirstOrDefault(x => x.Id == QuestId);
+        _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
+        AmountToPrintString = _quest.AmountToPrint.ToString();
         _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
+        _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players");
+        _filteredPlayers = _players;
+        _filteredNpcsGivers = _npcs;
+        _filteredNpcsEndings = _npcs;
+        _initialQuestPlayers = _quest.QuestPlayers.ToList();
+        _selectedPlayers = _initialQuestPlayers.Select(x => _players.FirstOrDefault(x1 => x1.Id == x.PlayerId)).ToList();
     }
 
     protected async Task Submit()
@@ -148,6 +247,26 @@ else
         {
             _quest.AmountToPrint = int.Parse(AmountToPrintString);
             await Http.PutJsonAsync<Location>($"{BaseApiUrl}/quests", _quest);
+            foreach (var questPlayer in _initialQuestPlayers)
+            {
+                var response = await Http.DeleteAsync($"{BaseApiUrl}/questPlayers/{questPlayer.Id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var parameters = new ModalParameters();
+                    parameters.Add("Message", "Что-то пошло не так.");
+
+                    Modal.Show<Notification>("Notification", parameters);
+                }
+            }
+            foreach (var player in _selectedPlayers)
+            {
+                var questPlayer = new QuestPlayer
+                {
+                    QuestId = QuestId,
+                    PlayerId = player.Id,
+                };
+                await Http.PostJsonAsync<QuestPlayer>($"{BaseApiUrl}/questPlayers", questPlayer);
+            }
             NavigationManager.NavigateTo($"/quests/{QuestId}");
         }
     }
@@ -162,6 +281,34 @@ else
     {
         var enumValue = (QuestGrade)grade;
         return enumValue.GetStringValue();
+    }
+
+    private void AddPlayer()
+    {
+        if (_selectedPlayer != null && _selectedPlayer.Id > 0)
+        {
+            _selectedPlayers.Add(new Player
+            {
+                Id = _selectedPlayer.Id,
+                Name = _selectedPlayer.Name,
+            });
+        }
+        StateHasChanged();
+    }
+
+    private void DeletePlayer()
+    {
+        if (_selectedPlayers != null && _selectedPlayers.Count > 0)
+        {
+            _selectedPlayers.RemoveAt(_selectedPlayers.Count - 1);
+            StateHasChanged();
+        }
+    }
+
+    private void SelectPlayer(ChangeEventArgs e)
+    {
+        var playerId = int.Parse(e.Value.ToString());
+        _selectedPlayer = _players.FirstOrDefault(x => x.Id == playerId);
     }
 
     private void Cancel()
