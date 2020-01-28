@@ -9,7 +9,7 @@ namespace LarpQuestSystem.Data.Model
         public string Description { get; set; }
         public virtual ICollection<Quest> StartingQuests { get; set; }
         public virtual ICollection<Quest> EndingQuests { get; set; }
-
+        public virtual ICollection<QuestItem> ItemsOnStart { get; set; } 
         public int LocationId { get; set; }
         public virtual Location Location { get; set; }
     }

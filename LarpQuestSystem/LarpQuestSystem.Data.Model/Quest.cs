@@ -11,6 +11,8 @@ namespace LarpQuestSystem.Data.Model
         public bool IsArtisticTextReady { get; set; }
         public string TechnicalDescriptionLink { get; set; }
         public bool IsTechnicalDescriptionReady { get; set; }
+        public int AmountToPrint { get; set; }
+        public bool IsPrinted { get; set; }
         public int Complexity { get; set; }
         public int Grade { get; set; }
         public int QuestGiverId { get; set; }
@@ -19,6 +21,6 @@ namespace LarpQuestSystem.Data.Model
         public virtual Npc QuestEnding { get; set; }
         public virtual ICollection<QuestItem> QuestItems { get; set; }
         public virtual ICollection<QuestChain> QuestChains { get; set; }
-
+        public virtual ICollection<QuestPlayer> QuestPlayers { get; set; }
     }
 }

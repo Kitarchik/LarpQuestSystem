@@ -32,6 +32,10 @@ namespace LarpQuestSystem.Data
                 .HasOne(x => x.Item)
                 .WithMany(x => x.QuestItems)
                 .HasForeignKey(x => x.ItemId);
+            modelBuilder.Entity<QuestItem>()
+                .HasOne(x => x.StartingNpc)
+                .WithMany(x => x.ItemsOnStart)
+                .HasForeignKey(x => x.StartingNpcId);
             modelBuilder.Entity<Quest>()
                 .HasOne(x => x.QuestGiver)
                 .WithMany(x => x.StartingQuests)
@@ -58,6 +62,17 @@ namespace LarpQuestSystem.Data
                 .HasOne(x => x.Location)
                 .WithMany(x => x.Npcs)
                 .HasForeignKey(x => x.LocationId);
+            modelBuilder.Entity<QuestPlayer>()
+                .HasKey(x => new { x.PlayerId, x.QuestId });
+            modelBuilder.Entity<QuestPlayer>()
+                .HasOne(x => x.Quest)
+                .WithMany(x => x.QuestPlayers)
+                .HasForeignKey(x => x.QuestId);
+            modelBuilder.Entity<QuestPlayer>()
+                .HasOne(x => x.Player)
+                .WithMany(x => x.QuestPlayers)
+                .HasForeignKey(x => x.PlayerId);
+
 
             modelBuilder.Entity<Chain>()
                 .Property(x => x.Name)
@@ -105,6 +120,15 @@ namespace LarpQuestSystem.Data
                 .Property(x => x.Description)
                 .HasMaxLength(2000);
             modelBuilder.Entity<Location>()
+                .HasIndex(x => x.Name)
+                .IsUnique();
+            modelBuilder.Entity<Player>()
+                .Property(x => x.Name)
+                .HasMaxLength(250);
+            modelBuilder.Entity<Player>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
+            modelBuilder.Entity<Player>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
         }

@@ -1,6 +1,7 @@
 ﻿@page "/npcs/{NpcId:int}"
 @using LarpQuestSystem.Data.Model
-@using LarpQuestSystem.WebApp.Components
+@using LarpQuestSystem.WebApp.Components.Utils
+@using LarpQuestSystem.WebApp.Components.Quests
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -18,8 +19,8 @@ else
     <p><em>Описание: @_npc.Description</em></p>
     <p><em>Локация: @_npc.Location.Name</em></p>
     <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="EditNpc">Редактировать НПС</button>
-        <button class="btn btn-primary" @onclick="DeleteNpc">Удалить НПС</button>
+        <button class="btn btn-primary" @onclick="@EditNpc">Редактировать НПС</button>
+        <button class="btn btn-primary" @onclick="@DeleteNpc">Удалить НПС</button>
     </div>
     if (_npc.StartingQuests.Any())
     {
@@ -80,17 +81,20 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        var response = await Http.DeleteAsync($"{BaseApiUrl}/npcs/{NpcId}");
-        if (response.IsSuccessStatusCode)
-        {
-            NavigationManager.NavigateTo("/npcs");
-        }
         else
         {
-            var parameters = new ModalParameters();
-            parameters.Add("Message", "Что-то пошло не так.");
+            var response = await Http.DeleteAsync($"{BaseApiUrl}/npcs/{NpcId}");
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/npcs");
+            }
+            else
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Что-то пошло не так.");
 
-            Modal.Show<Notification>("Notification", parameters);
+                Modal.Show<Notification>("Notification", parameters);
+            }
         }
     }
 

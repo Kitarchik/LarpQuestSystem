@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LarpQuestSystem.Data.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    [Migration("20200126125250_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20200128131900_AddedPlayersTable")]
+    partial class AddedPlayersTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,6 +53,12 @@ namespace LarpQuestSystem.Data.Migrations
 
                     b.Property<int>("AmountReady")
                         .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ItemType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
@@ -120,12 +126,39 @@ namespace LarpQuestSystem.Data.Migrations
                     b.ToTable("Npcs");
                 });
 
+            modelBuilder.Entity("LarpQuestSystem.Data.Model.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(2000)")
+                        .HasMaxLength(2000);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(250)")
+                        .HasMaxLength(250);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
+
+                    b.ToTable("Player");
+                });
+
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Quest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AmountToPrint")
+                        .HasColumnType("int");
 
                     b.Property<string>("ArtisticTextLink")
                         .HasColumnType("nvarchar(2000)")
@@ -142,6 +175,9 @@ namespace LarpQuestSystem.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsArtisticTextReady")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrinted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsTechnicalDescriptionReady")
@@ -218,13 +254,33 @@ namespace LarpQuestSystem.Data.Migrations
                     b.Property<int>("QuestId")
                         .HasColumnType("int");
 
+                    b.Property<int>("StartingNpcId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
 
                     b.HasIndex("QuestId");
 
+                    b.HasIndex("StartingNpcId");
+
                     b.ToTable("QuestItems");
+                });
+
+            modelBuilder.Entity("LarpQuestSystem.Data.Model.QuestPlayer", b =>
+                {
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerId", "QuestId");
+
+                    b.HasIndex("QuestId");
+
+                    b.ToTable("QuestPlayer");
                 });
 
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Npc", b =>
@@ -276,6 +332,27 @@ namespace LarpQuestSystem.Data.Migrations
 
                     b.HasOne("LarpQuestSystem.Data.Model.Quest", "Quest")
                         .WithMany("QuestItems")
+                        .HasForeignKey("QuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LarpQuestSystem.Data.Model.Npc", "StartingNpc")
+                        .WithMany("ItemsOnStart")
+                        .HasForeignKey("StartingNpcId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LarpQuestSystem.Data.Model.QuestPlayer", b =>
+                {
+                    b.HasOne("LarpQuestSystem.Data.Model.Player", "Player")
+                        .WithMany("QuestPlayers")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LarpQuestSystem.Data.Model.Quest", "Quest")
+                        .WithMany("QuestPlayers")
                         .HasForeignKey("QuestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

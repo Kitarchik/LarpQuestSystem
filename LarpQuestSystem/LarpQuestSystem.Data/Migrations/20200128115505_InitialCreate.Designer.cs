@@ -3,14 +3,16 @@ using LarpQuestSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LarpQuestSystem.Data.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    partial class QuestContextModelSnapshot : ModelSnapshot
+    [Migration("20200128115505_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,30 +126,6 @@ namespace LarpQuestSystem.Data.Migrations
                     b.ToTable("Npcs");
                 });
 
-            modelBuilder.Entity("LarpQuestSystem.Data.Model.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(250)")
-                        .HasMaxLength(250);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
-
-                    b.ToTable("Player");
-                });
-
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Quest", b =>
                 {
                     b.Property<int>("Id")
@@ -184,6 +162,9 @@ namespace LarpQuestSystem.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
+
+                    b.Property<string>("Players")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("QuestEndingId")
                         .HasColumnType("int");
@@ -266,21 +247,6 @@ namespace LarpQuestSystem.Data.Migrations
                     b.ToTable("QuestItems");
                 });
 
-            modelBuilder.Entity("LarpQuestSystem.Data.Model.QuestPlayer", b =>
-                {
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuestId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PlayerId", "QuestId");
-
-                    b.HasIndex("QuestId");
-
-                    b.ToTable("QuestPlayer");
-                });
-
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Npc", b =>
                 {
                     b.HasOne("LarpQuestSystem.Data.Model.Location", "Location")
@@ -337,21 +303,6 @@ namespace LarpQuestSystem.Data.Migrations
                     b.HasOne("LarpQuestSystem.Data.Model.Npc", "StartingNpc")
                         .WithMany("ItemsOnStart")
                         .HasForeignKey("StartingNpcId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LarpQuestSystem.Data.Model.QuestPlayer", b =>
-                {
-                    b.HasOne("LarpQuestSystem.Data.Model.Player", "Player")
-                        .WithMany("QuestPlayers")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LarpQuestSystem.Data.Model.Quest", "Quest")
-                        .WithMany("QuestPlayers")
-                        .HasForeignKey("QuestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
