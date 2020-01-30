@@ -5,7 +5,7 @@
 {
     <div>
         <div class="col-sm-10">
-            <input type="text" id="txtFilter" @bind-value="@Filter" @bind-value:event="oninput" />
+            <input type="text" @bind-value="@Filter" @bind-value:event="oninput" />
         </div>
         <div class="col-sm-10">
             <select id="nextItem" size="5" @onchange="@SelectItem">

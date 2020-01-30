@@ -58,6 +58,8 @@ namespace LarpQuestSystem.Api.Controllers
                     TechnicalDescriptionLink = quest.TechnicalDescriptionLink,
                     IsTechnicalDescriptionReady = quest.IsTechnicalDescriptionReady,
                     IsPrinted = quest.IsPrinted,
+                    QuestEndingId = quest.QuestEndingId,
+                    QuestGiverId = quest.QuestGiverId,
                 },
                 QuestGiver = new Npc
                 {

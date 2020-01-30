@@ -1,12 +1,10 @@
-﻿using System;
+﻿using LarpQuestSystem.Data;
+using LarpQuestSystem.Data.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LarpQuestSystem.Data;
-using LarpQuestSystem.Data.Model;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace LarpQuestSystem.Api.Controllers
 {

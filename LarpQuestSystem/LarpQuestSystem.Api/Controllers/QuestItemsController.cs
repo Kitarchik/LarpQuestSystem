@@ -25,16 +25,6 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.QuestItems.ToListAsync();
         }
 
-        [HttpGet("full")]
-        public async Task<ActionResult<IEnumerable<QuestItem>>> GetFull()
-        {
-            return await _db.QuestItems
-                .Include(x => x.Item)
-                .Include(x => x.Quest)
-                .Include(x => x.StartingNpc)
-                .ToListAsync();
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestItem>> Get(int id)
         {

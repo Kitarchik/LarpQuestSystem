@@ -160,9 +160,10 @@ else
         _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players");
         _items = await Http.GetJsonAsync<List<Item>>($"{BaseApiUrl}/items");
         _initialPlayers = _questView.Players;
-        _selectedPlayers = _initialPlayers;
+        _selectedPlayers = _initialPlayers.ToList();
         _initialItems = _questView.QuestItems;
-        _selectedItems = _initialItems;
+        _selectedItems = _initialItems.ToList();
+        _selectedItem = new QuestItem();
     }
 
     protected async Task Submit()
@@ -200,7 +201,7 @@ else
                 if (!response.IsSuccessStatusCode)
                 {
                     var parameters = new ModalParameters();
-                    parameters.Add("Message", "Что-то пошло не так.");
+                    parameters.Add("Message", "Что-то пошло не так c игроками.");
 
                     Modal.Show<Notification>("Notification", parameters);
                 }
@@ -220,7 +221,7 @@ else
                 if (!response.IsSuccessStatusCode)
                 {
                     var parameters = new ModalParameters();
-                    parameters.Add("Message", "Что-то пошло не так.");
+                    parameters.Add("Message", "Что-то пошло не так с предметами.");
 
                     Modal.Show<Notification>("Notification", parameters);
                 }
@@ -232,8 +233,10 @@ else
                     QuestId = QuestId,
                     ItemId = item.ItemId,
                     StartingNpcId = item.StartingNpcId,
+                    TechnicalDocumentForNpc = item.TechnicalDocumentForNpc,
+                    AmountNeeded = item.AmountNeeded,
                 };
-                await Http.PostJsonAsync<QuestPlayer>($"{BaseApiUrl}/questItems", item);
+                await Http.PostJsonAsync<QuestPlayer>($"{BaseApiUrl}/questItems", newItem);
             }
             NavigationManager.NavigateTo($"/quests/{QuestId}");
         }

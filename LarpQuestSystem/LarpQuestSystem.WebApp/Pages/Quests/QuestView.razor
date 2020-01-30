@@ -18,10 +18,10 @@
 }
 else
 {
-    <p><em>Имя: @_quest.Name</em></p>
-    <p><em>Описание: @_quest.Description</em></p>
+    <p>Имя: @_quest.Name</p>
+    <p>Описание: @_quest.Description</p>
     <p>
-        <em>Художественный текст: @GetStatus(_quest.IsArtisticTextReady)</em>
+        Художественный текст: @GetStatus(_quest.IsArtisticTextReady)
         @if (!string.IsNullOrEmpty(_quest.ArtisticTextLink))
         {
             <button class="btn btn-primary" @onclick="@EditArtisticTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
@@ -29,7 +29,7 @@ else
         }
     </p>
     <p>
-        <em>Техническое описание: @GetStatus(_quest.IsTechnicalDescriptionReady)</em>
+        Техническое описание: @GetStatus(_quest.IsTechnicalDescriptionReady)
         @if (!string.IsNullOrEmpty(_quest.TechnicalDescriptionLink))
         {
             <button class="btn btn-primary" @onclick="@EditTechnicalTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
@@ -37,14 +37,14 @@ else
         }
     </p>
     <p>
-        <em>Готовность по печати: @GetStatus(_quest.IsPrinted)</em>
+        Готовность по печати: @GetStatus(_quest.IsPrinted)
         <button class="btn btn-primary" @onclick="@ChangePrintedStatus"> Сменить статус </button>
     </p>
-    <p><em>Квест выдает: @_questGiver.Name</em></p>
-    <p><em>Квест принимает: @_questEnding.Name</em></p>
-    <p><em>Количество копий в печать: @_quest.AmountToPrint</em></p>
-    <p><em>Сложность: @GetComplexity(_quest.Complexity)</em></p>
-    <p><em>Градация: @GetGrade(_quest.Complexity)</em></p>
+    <p>Квест выдает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questGiver.Id))">@_questGiver.Name</button></p>
+    <p>Квест принимает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questEnding.Id))">@_questEnding.Name</button></p>
+    <p>Количество копий в печать: @_quest.AmountToPrint</p>
+    <p>Сложность: @GetComplexity(_quest.Complexity)</p>
+    <p>Градация: @GetGrade(_quest.Complexity)</p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
         <button class="btn btn-primary" @onclick="@DeleteQuest">Удалить квест</button>
@@ -222,5 +222,10 @@ else
     private void EditQuest()
     {
         NavigationManager.NavigateTo($"/quests/edit/{QuestId}");
+    }
+
+    private void NavigateToNpcView(int npcId)
+    {
+        NavigationManager.NavigateTo($"/npcs/{npcId}");
     }
 }
