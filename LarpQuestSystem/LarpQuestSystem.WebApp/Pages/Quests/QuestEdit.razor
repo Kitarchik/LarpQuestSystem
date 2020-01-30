@@ -45,38 +45,12 @@ else
         </div>
     </div>
     <div class="form-group row">
-        <label for="txtQuestGiverFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
-        <div class="col-sm-10">
-            <input type="text" id="txtQuestGiverFilter" @bind-value="@QuestGiverFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
-        </div>
+        <label class="col-sm-2 col-form-label">НПС выдающий квест: </label>
+        <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestGiver.Name" OnItemSelect="@SelectQuestGiver" />
     </div>
     <div class="form-group row">
-        <label for="txtQuestGiver" class="col-sm-2 col-form-label">НПС выдающий квест</label>
-        <div class="col-sm-10">
-            <select id="txtQuestGiver" size="5" @bind="_quest.QuestGiverId">
-                @foreach (var npc in _filteredNpcsGivers)
-                {
-                    <option value="@npc.Id">@npc.Name</option>
-                }
-            </select>
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="txtQuestEndingFilter" class="col-sm-2 col-form-label">Фильтр НПС: </label>
-        <div class="col-sm-10">
-            <input type="text" id="txtQuestEndingFilter" @bind-value="@QuestEndingFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="txtQuestEnding" class="col-sm-2 col-form-label">НПС принимающий квест</label>
-        <div class="col-sm-10">
-            <select id="txtQuestEnding" size="5" @bind="_quest.QuestEndingId">
-                @foreach (var npc in _filteredNpcsEndings)
-                {
-                    <option value="@npc.Id">@npc.Name</option>
-                }
-            </select>
-        </div>
+        <label class="col-sm-2 col-form-label">НПС принимающий квест: </label>
+        <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestEnding.Name" OnItemSelect="@SelectQuestEnding" />
     </div>
     <div class="form-group row">
         <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
@@ -108,27 +82,47 @@ else
     }
     <div class="form-group row">
         <label for="txtPlayerFilter" class="col-sm-2 col-form-label">Фильтр</label>
-        <div class="col-sm-10">
-            <input type="text" id="txtPlayerFilter" @bind-value="@PlayerFilter" @bind-value:event="oninput" placeholder="Имя игрока" />
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="nextQuest" class="col-sm-2 col-form-label">Добавить игрока/команду</label>
-        <div class="col-sm-10">
-            <select id="nextQuest" size="5" @onchange="@SelectPlayer">
-                @foreach (var player in _filteredPlayers)
-                {
-                    <option value="@player.Id">@player.Name</option>
-                }
-            </select>
-        </div>
+        <FilterItems Items="@_players.Select(x=>x.Name).ToList()" OnItemSelect="@SelectPlayer" />
     </div>
     <div class="form-group row">
         <button class="btn btn-primary" @onclick="@AddPlayer">Добавить игрока</button>
         <button class="btn btn-primary" @onclick="@DeletePlayer">Убрать игрока</button>
     </div>
+    @if (_selectedItems != null)
+    {
+        @for (int i = 0; i < _selectedItems.Count; i++)
+        {
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <p><em>Предмет: @_selectedItems[i].Item.Name  Количество: @_selectedItems[i].AmountNeeded  НПС, хранящий предмет: @_selectedItems[i].StartingNpc.Name</em></p>
+                </div>
+            </div>
+        }
+    }
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <label class="col-sm-2 col-form-label">Выберите предмет</label>
+            <FilterItems Items="@_items.Select(x=>x.Name).ToList()" OnItemSelect="@SelectItem" />
+        </div>
+        <div class="col-sm-10">
+            <label class="col-sm-2 col-form-label">Выберите НПС у которого он хранится</label>
+            <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" OnItemSelect="@SelectNpcForItem" />
+        </div>
+        <div class="col-sm-10">
+            <label for="txtItemAmount" class="col-sm-2 col-form-label">Требуемое количество предметов: </label>
+            <input type="text" id="txtItemAmount" @bind="@_itemAmountNeeded" />
+        </div>
+        <div class="col-sm-10">
+            <label for="txtTechnicalDocument" class="col-sm-2 col-form-label">Технический документ для НПС: </label>
+            <input type="text" id="txtTechnicalDocument" @bind="@_itemTechnicalDocument" />
+        </div>
+    </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@AddItem">Добавить предмет</button>
+        <button class="btn btn-primary" @onclick="@DeleteItem">Убрать предмет</button>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
         <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
     </div>
 }
@@ -136,88 +130,39 @@ else
 @code {
     private string _message = "Загрузка...";
     private Quest _quest;
+    private QuestInfoView _questView;
     private List<Quest> _quests;
     private List<Npc> _npcs;
-    private List<Npc> _filteredNpcsGivers;
-    private List<Npc> _filteredNpcsEndings;
-    private string _questGiverFilter = string.Empty;
-    private string _questEndingFilter = string.Empty;
-    private List<QuestPlayer> _initialQuestPlayers;
-    private List<Player> _selectedPlayers;
     private List<Player> _players;
+    private List<Item> _items;
     private Player _selectedPlayer;
+    private List<Player> _selectedPlayers;
+    private List<Player> _initialPlayers;
+    private List<QuestItem> _initialItems;
+    private List<QuestItem> _selectedItems;
+    private QuestItem _selectedItem;
     private string _amountToPrintString;
-    private string _playerFilter = string.Empty;
-    private List<Player> _filteredPlayers;
+    private string _itemAmountNeeded = "1";
+    private string _itemTechnicalDocument;
 
     [Parameter]
     public int QuestId { get; set; }
 
     [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
-    public string PlayerFilter
-    {
-        get => _playerFilter;
-        set
-        {
-            _playerFilter = value;
-            FilterPlayers();
-        }
-    }
-
-    public string QuestGiverFilter
-    {
-        get => _questGiverFilter;
-        set
-        {
-            _questGiverFilter = value;
-            FilterNpcs();
-        }
-    }
-
-    public string QuestEndingFilter
-    {
-        get => _questEndingFilter;
-        set
-        {
-            _questEndingFilter = value;
-            FilterNpcs();
-        }
-    }
-
-    private void FilterNpcs()
-    {
-        _filteredNpcsGivers = _npcs
-            .Where(x => x.Name.Contains(QuestGiverFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        _filteredNpcsEndings = _npcs
-            .Where(x => x.Name.Contains(QuestEndingFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        StateHasChanged();
-    }
-
-    private void FilterPlayers()
-    {
-        _filteredPlayers = _players
-            .Where(x => x.Name.Contains(PlayerFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        StateHasChanged();
-    }
-
     protected override async Task OnInitializedAsync()
     {
         _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
-        _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
+        _questView = await Http.GetJsonAsync<QuestInfoView>($"{BaseApiUrl}/quests/{QuestId}");
+        _quest = _questView.Quest;
         _amountToPrintString = _quest.AmountToPrint.ToString();
         _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
         _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players");
-        _filteredPlayers = _players;
-        _filteredNpcsGivers = _npcs;
-        _filteredNpcsEndings = _npcs;
-        _initialQuestPlayers = _quest.QuestPlayers.ToList();
-        _selectedPlayers = _initialQuestPlayers.Select(x => _players.FirstOrDefault(x1 => x1.Id == x.PlayerId)).ToList();
+        _items = await Http.GetJsonAsync<List<Item>>($"{BaseApiUrl}/items");
+        _initialPlayers = _questView.Players;
+        _selectedPlayers = _initialPlayers;
+        _initialItems = _questView.QuestItems;
+        _selectedItems = _initialItems;
     }
 
     protected async Task Submit()
@@ -246,9 +191,11 @@ else
         else
         {
             _quest.AmountToPrint = int.Parse(_amountToPrintString);
-            await Http.PutJsonAsync<Location>($"{BaseApiUrl}/quests", _quest);
-            foreach (var questPlayer in _initialQuestPlayers)
+            await Http.PutJsonAsync<Quest>($"{BaseApiUrl}/quests", _quest);
+            var questPlayers = await Http.GetJsonAsync<List<QuestPlayer>>($"{BaseApiUrl}/questPlayers");
+            foreach (var player in _initialPlayers)
             {
+                var questPlayer = questPlayers.First(x => x.QuestId == _quest.Id && x.PlayerId == player.Id);
                 var response = await Http.DeleteAsync($"{BaseApiUrl}/questPlayers/{questPlayer.Id}");
                 if (!response.IsSuccessStatusCode)
                 {
@@ -266,6 +213,27 @@ else
                     PlayerId = player.Id,
                 };
                 await Http.PostJsonAsync<QuestPlayer>($"{BaseApiUrl}/questPlayers", questPlayer);
+            }
+            foreach (var item in _initialItems)
+            {
+                var response = await Http.DeleteAsync($"{BaseApiUrl}/questItems/{item.Id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var parameters = new ModalParameters();
+                    parameters.Add("Message", "Что-то пошло не так.");
+
+                    Modal.Show<Notification>("Notification", parameters);
+                }
+            }
+            foreach (var item in _selectedItems)
+            {
+                var newItem = new QuestItem
+                {
+                    QuestId = QuestId,
+                    ItemId = item.ItemId,
+                    StartingNpcId = item.StartingNpcId,
+                };
+                await Http.PostJsonAsync<QuestPlayer>($"{BaseApiUrl}/questItems", item);
             }
             NavigationManager.NavigateTo($"/quests/{QuestId}");
         }
@@ -305,10 +273,72 @@ else
         }
     }
 
-    private void SelectPlayer(ChangeEventArgs e)
+    private void AddItem()
     {
-        var playerId = int.Parse(e.Value.ToString());
-        _selectedPlayer = _players.FirstOrDefault(x => x.Id == playerId);
+        if (!int.TryParse(_itemAmountNeeded, out int result))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Укажите количество предметов.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_selectedItem != null && _selectedItem.ItemId > 0 && _selectedItem.StartingNpcId > 0 && int.Parse(_itemAmountNeeded) > 0)
+        {
+            _selectedItem.AmountNeeded = int.Parse(_itemAmountNeeded);
+            _selectedItems.Add(new QuestItem
+            {
+                AmountNeeded = _selectedItem.AmountNeeded,
+                ItemId = _selectedItem.ItemId,
+                Item = _selectedItem.Item,
+                StartingNpc = _selectedItem.StartingNpc,
+                StartingNpcId = _selectedItem.StartingNpcId,
+                TechnicalDocumentForNpc = _itemTechnicalDocument,
+            });
+            _selectedItem = new QuestItem();
+            _itemAmountNeeded = "1";
+            StateHasChanged();
+        }
+    }
+
+    private void DeleteItem()
+    {
+        if (_selectedItems != null && _selectedItems.Count > 0)
+        {
+            _selectedItems.RemoveAt(_selectedItems.Count - 1);
+            StateHasChanged();
+        }
+    }
+
+    private void SelectQuestGiver(string questGiverName)
+    {
+        _quest.QuestGiverId = _npcs.First(x => x.Name == questGiverName).Id;
+    }
+
+    private void SelectQuestEnding(string questEndingName)
+    {
+        _quest.QuestEndingId = _npcs.First(x => x.Name == questEndingName).Id;
+    }
+
+    private void SelectPlayer(string playerName)
+    {
+        _selectedPlayer = _players.FirstOrDefault(x => x.Name == playerName);
+    }
+
+    private void SelectItem(string itemName)
+    {
+        var item = _items.First(x => x.Name == itemName);
+        _selectedItem.ItemId = item.Id;
+        _selectedItem.Item = new Item
+        {
+            Name = item.Name,
+        };
+    }
+
+    private void SelectNpcForItem(string npcName)
+    {
+        var npc = _npcs.First(x => x.Name == npcName);
+        _selectedItem.StartingNpcId = npc.Id;
+        _selectedItem.StartingNpc = npc;
     }
 
     private void Cancel()

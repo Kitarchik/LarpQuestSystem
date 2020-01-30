@@ -31,7 +31,7 @@ else
         <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_locations.First(x=>x.Id==_npc.LocationId).Name" OnItemSelect="@SelectLocation" />
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
         <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
     </div>
 }

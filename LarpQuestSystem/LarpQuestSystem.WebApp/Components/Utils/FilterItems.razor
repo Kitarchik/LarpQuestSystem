@@ -46,13 +46,18 @@ else
         }
     }
 
-    protected override Task OnParametersSetAsync()
+    protected override void OnInitialized()
     {
         if (SelectedItem != null && _isSelected == false)
         {
             _selectedItem = SelectedItem;
             _isSelected = true;
         }
+        base.OnInitialized();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
         _filteredItems = Items;
         return base.OnParametersSetAsync();
     }

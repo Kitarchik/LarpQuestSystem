@@ -31,8 +31,8 @@ else
         <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_playerView.Location.Name" OnItemSelect="@SelectLocation" />
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-        <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
     </div>
 }
 
