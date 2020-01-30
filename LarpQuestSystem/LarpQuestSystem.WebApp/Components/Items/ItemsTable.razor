@@ -1,0 +1,60 @@
+﻿@using LarpQuestSystem.Data.Model
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название предмета" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Название предмета</th>
+            <th>Количество готовых (шт)</th>
+            <th>Описание</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in _filteredItems)
+        {
+            <tr @onclick="(() => NavigateToItemView(item.Id))">
+                <td>@item.Name</td>
+                <td>@item.AmountReady</td>
+                <td>@item.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+                   {
+    private List<Item> _filteredItems;
+    private string _filterString = string.Empty;
+
+    [CascadingParameter]
+    private List<Item> Items { get; set; }
+
+    public string FilterString
+    {
+        get => _filterString;
+        set
+        {
+            _filterString = value;
+            FilterItems();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredItems = Items;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterItems()
+    {
+        _filteredItems = Items.Where(x => x.Name.Contains(_filterString, StringComparison.OrdinalIgnoreCase)).ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToItemView(int itemId)
+    {
+        NavigationManager.NavigateTo($"/items/{itemId}");
+    }
+
+}

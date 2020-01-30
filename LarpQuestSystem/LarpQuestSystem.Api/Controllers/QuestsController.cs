@@ -19,19 +19,6 @@ namespace LarpQuestSystem.Api.Controllers
             _db = context;
         }
 
-        [HttpGet("full")]
-        public async Task<ActionResult<IEnumerable<Quest>>> GetFull()
-        {
-            return await _db.Quests
-                .Include(x => x.QuestGiver)
-                .Include(x => x.QuestEnding)
-                .Include(x => x.QuestChains)
-                .ThenInclude(x => x.Chain)
-                .Include(x=>x.QuestPlayers)
-                .ThenInclude(x=>x.Player)
-                .ToListAsync();
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quest>>> Get()
         {
@@ -39,20 +26,84 @@ namespace LarpQuestSystem.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Quest>> Get(int id)
+        public async Task<ActionResult<QuestInfoView>> Get(int id)
         {
             Quest quest = await _db.Quests
                 .Include(x => x.QuestGiver)
                 .Include(x => x.QuestEnding)
                 .Include(x => x.QuestChains)
-                .ThenInclude(x=>x.Chain)
+                .ThenInclude(x => x.Chain)
                 .Include(x => x.QuestPlayers)
                 .ThenInclude(x => x.Player)
-                .ThenInclude(x => x.Location)
+                .Include(x => x.QuestItems)
+                .ThenInclude(x => x.Item)
+                .Include(x => x.QuestItems)
+                .ThenInclude(x => x.StartingNpc)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (quest == null)
                 return NotFound();
-            return new ObjectResult(quest);
+
+            var questView = new QuestInfoView
+            {
+                Quest = new Quest
+                {
+                    AmountToPrint = quest.AmountToPrint,
+                    ArtisticTextLink = quest.ArtisticTextLink,
+                    Complexity = quest.Complexity,
+                    Description = quest.Description,
+                    Grade = quest.Grade,
+                    Id = quest.Id,
+                    IsArtisticTextReady = quest.IsArtisticTextReady,
+                    Name = quest.Name,
+                    TechnicalDescriptionLink = quest.TechnicalDescriptionLink,
+                    IsTechnicalDescriptionReady = quest.IsTechnicalDescriptionReady,
+                    IsPrinted = quest.IsPrinted,
+                },
+                QuestGiver = new Npc
+                {
+                    Description = quest.QuestGiver.Description,
+                    Id = quest.QuestGiver.Id,
+                    Name = quest.QuestGiver.Name,
+                },
+                QuestEnding = new Npc
+                {
+                    Description = quest.QuestEnding.Description,
+                    Id = quest.QuestEnding.Id,
+                    Name = quest.QuestEnding.Name,
+                },
+                Chains = quest.QuestChains.Select(x => x.Chain).Select(c => new Chain
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                }).ToList(),
+                Players = quest.QuestPlayers.Select(x => x.Player).Select(p => new Player
+                {
+                    Id = p.Id,
+                    Description = p.Description,
+                    Name = p.Name,
+                }).ToList(),
+                QuestItems = quest.QuestItems.Select(x => new QuestItem
+                {
+                    AmountNeeded = x.AmountNeeded,
+                    Id = x.Id,
+                    IsReady = x.IsReady,
+                    IsTechnicalDocumentReady = x.IsTechnicalDocumentReady,
+                    TechnicalDocumentForNpc = x.TechnicalDocumentForNpc,
+                    StartingNpc = new Npc
+                    {
+                        Id = x.StartingNpcId,
+                        Name = x.StartingNpc.Name,
+                    },
+                    Item = new Item
+                    {
+                        Id = x.ItemId,
+                        Name = x.Item.Name,
+                    },
+                }).ToList(),
+            };
+
+            return new ObjectResult(questView);
         }
 
         [HttpPost]

@@ -23,8 +23,11 @@ namespace LarpQuestSystem.Api
         {
             var connection = Configuration.GetConnectionString("QuestDatabase");
             services.AddDbContext<QuestContext>(options => options.UseSqlServer(connection));
-            services.AddControllers().AddNewtonsoftJson(options => { 
-                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; });
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",

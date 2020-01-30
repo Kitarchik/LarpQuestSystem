@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LarpQuestSystem.Data.Model
 {
@@ -15,6 +16,9 @@ namespace LarpQuestSystem.Data.Model
         public bool IsPrinted { get; set; }
         public int Complexity { get; set; }
         public int Grade { get; set; }
+        public bool IsCompleted { get; set; }
+        public string CompletionComment { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public int QuestGiverId { get; set; }
         public virtual Npc QuestGiver { get; set; }
         public int QuestEndingId { get; set; }

@@ -26,15 +26,38 @@ namespace LarpQuestSystem.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Location>> Get(int id)
+        public async Task<ActionResult<LocationInfoView>> Get(int id)
         {
             Location location = await _db.Locations
                 .Include(x => x.Npcs)
-                .Include(x=>x.Players)
+                .Include(x => x.Players)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (location == null)
                 return NotFound();
-            return new ObjectResult(location);
+
+            var locationInfo = new LocationInfoView
+            {
+                Location = new Location
+                {
+                    Id = location.Id,
+                    Description = location.Description,
+                    Name = location.Name,
+                },
+                Npcs = location.Npcs.Select(x => new Npc
+                {
+                    Description = x.Description,
+                    Id = x.Id,
+                    Name = x.Name,
+                }).ToList(),
+                Players = location.Players.Select(x => new Player
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                }).ToList(),
+            };
+
+            return new ObjectResult(locationInfo);
         }
 
         [HttpPost]

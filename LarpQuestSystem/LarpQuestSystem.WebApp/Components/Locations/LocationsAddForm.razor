@@ -65,6 +65,7 @@ else
     private void HideForm()
     {
         _showForm = false;
+        _locationToAdd = new Location();
         StateHasChanged();
     }
 
@@ -97,7 +98,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _locationToAdd = JsonConvert.DeserializeObject<Location>(jsonTask.Result);
-                await ChangeLocations();
+                ChangeLocations();
                 _locationToAdd = new Location();
                 _showForm = false;
                 StateHasChanged();
@@ -113,10 +114,9 @@ else
         }
     }
 
-    private async Task ChangeLocations()
+    private void ChangeLocations()
     {
-        var newLocation = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{_locationToAdd.Id}");
-        Locations.Add(newLocation);
+        Locations.Add(_locationToAdd);
         OnLocationsChange?.Invoke(Locations);
     }
 }

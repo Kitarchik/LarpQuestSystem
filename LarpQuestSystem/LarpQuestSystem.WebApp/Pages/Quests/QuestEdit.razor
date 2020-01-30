@@ -41,7 +41,7 @@ else
     <div class="form-group row">
         <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество копий в печать</label>
         <div class="col-sm-10">
-            <input type="text" id="txtAmountToPrint" class="form-control" @bind="@AmountToPrintString" />
+            <input type="text" id="txtAmountToPrint" class="form-control" @bind="@_amountToPrintString" />
         </div>
     </div>
     <div class="form-group row">
@@ -146,7 +146,7 @@ else
     private List<Player> _selectedPlayers;
     private List<Player> _players;
     private Player _selectedPlayer;
-    private string AmountToPrintString;
+    private string _amountToPrintString;
     private string _playerFilter = string.Empty;
     private List<Player> _filteredPlayers;
 
@@ -210,7 +210,7 @@ else
     {
         _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
         _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
-        AmountToPrintString = _quest.AmountToPrint.ToString();
+        _amountToPrintString = _quest.AmountToPrint.ToString();
         _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
         _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players");
         _filteredPlayers = _players;
@@ -236,7 +236,7 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (!int.TryParse(AmountToPrintString, out int result) || result < 1)
+        else if (!int.TryParse(_amountToPrintString, out int result) || result < 1)
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Введите нормальное число. Будьте людьми то.");
@@ -245,7 +245,7 @@ else
         }
         else
         {
-            _quest.AmountToPrint = int.Parse(AmountToPrintString);
+            _quest.AmountToPrint = int.Parse(_amountToPrintString);
             await Http.PutJsonAsync<Location>($"{BaseApiUrl}/quests", _quest);
             foreach (var questPlayer in _initialQuestPlayers)
             {

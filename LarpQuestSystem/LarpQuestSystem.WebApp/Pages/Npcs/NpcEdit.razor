@@ -14,44 +14,26 @@
 }
 else
 {
-    <EditForm Model="@_npc" OnValidSubmit="@Submit">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
-
-        <div class="form-group row">
-            <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
-            <div class="col-sm-10">
-                <InputText id="txtNpcName" class="form-control" @bind-Value="@_npc.Name"></InputText>
-                <ValidationMessage For="@(() => _npc.Name)"></ValidationMessage>
-            </div>
+    <div class="form-group row">
+        <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtNpcName" class="form-control" @bind="@_npc.Name"/>
         </div>
-        <div class="form-group row">
-            <label for="txtNpcDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtNpcDescription" rows="5" @bind="@_npc.Description"></textarea>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtNpcDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtNpcDescription" rows="5" @bind="@_npc.Description"></textarea>
         </div>
-        <div class="form-group row">
-            <label for="txtLocationFilter" class="col-sm-2 col-form-label">Фильтр локаций: </label>
-            <div class="col-sm-10">
-                <input type="text" id="txtLocationFilter" @bind-value="@LocationFilter" @bind-value:event="oninput" placeholder="Название локации" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
-            <div class="col-sm-10">
-                <select id="txtNpcLocation" size="5" @bind="_npc.LocationId">
-                    @foreach (var location in _filteredLocations)
-                    {
-                        <option value="@location.Id">@location.Name</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
-        </div>
-    </EditForm>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Фильтр локаций: </label>
+        <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_locations.First(x=>x.Id==_npc.LocationId).Name" OnItemSelect="@SelectLocation" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
 }
 
 @code {
@@ -59,39 +41,17 @@ else
     private Npc _npc;
     private List<Npc> _npcs;
     private List<Location> _locations;
-    private List<Location> _filteredLocations { get; set; }
-    private string _locationFilter = string.Empty;
 
     [Parameter]
     public int NpcId { get; set; }
 
     [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
-    public string LocationFilter
-    {
-        get => _locationFilter;
-        set
-        {
-            _locationFilter = value;
-            FilterLocations();
-        }
-    }
-
-    private void FilterLocations()
-    {
-        _filteredLocations = _locations
-            .Where(x => x.Name.Contains(LocationFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        StateHasChanged();
-    }
-
     protected override async Task OnInitializedAsync()
     {
         _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
         _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
-        _filteredLocations = _locations;
         _npc = _npcs.FirstOrDefault(x => x.Id == NpcId);
-
     }
 
     protected async Task Submit()
@@ -119,9 +79,14 @@ else
         }
         else
         {
-            await Http.PutJsonAsync<Location>($"{BaseApiUrl}/npcs", _npc);
+            await Http.PutJsonAsync<Npc>($"{BaseApiUrl}/npcs", _npc);
             NavigationManager.NavigateTo($"/npcs/{NpcId}");
         }
+    }
+
+    private void SelectLocation(string locationName)
+    {
+        _npc.LocationId = _locations.First(x => x.Name == locationName).Id;
     }
 
     private void Cancel()

@@ -94,6 +94,9 @@ namespace LarpQuestSystem.Data
                 .Property(x => x.Name)
                 .HasMaxLength(250);
             modelBuilder.Entity<Item>()
+                .Property(x => x.Description)
+                .HasMaxLength(2000);
+            modelBuilder.Entity<Item>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
             modelBuilder.Entity<Quest>()
@@ -111,6 +114,9 @@ namespace LarpQuestSystem.Data
             modelBuilder.Entity<Quest>()
                 .Property(x => x.TechnicalDescriptionLink)
                 .HasMaxLength(2000);
+            modelBuilder.Entity<Quest>()
+                .Property(x => x.CompletionComment)
+                .HasMaxLength(2000);
             modelBuilder.Entity<Npc>()
                 .Property(x => x.Name)
                 .HasMaxLength(250);
@@ -138,6 +144,9 @@ namespace LarpQuestSystem.Data
             modelBuilder.Entity<Player>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
+            modelBuilder.Entity<QuestItem>()
+                .Property(x => x.TechnicalDocumentForNpc)
+                .HasMaxLength(2000);
         }
     }
 }

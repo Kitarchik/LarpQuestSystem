@@ -2,6 +2,7 @@
 @using LarpQuestSystem.Data.Model
 @using LarpQuestSystem.WebApp.Components.Utils
 @using LarpQuestSystem.WebApp.Components.Quests
+@using LarpQuestSystem.WebApp.Components.Items
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -15,14 +16,14 @@
 }
 else
 {
-    <p><em>Имя: @_npc.Name</em></p>
-    <p><em>Описание: @_npc.Description</em></p>
-    <p><em>Локация: @_npc.Location.Name</em></p>
+    <p>Имя: @Npc.Name</p>
+    <p>Описание: @Npc.Description</p>
+    <p>Локация: <button class="btn btn-primary" @onclick="(() => NavigateToLocationView(_npc.Location.Id))">@_npc.Location.Name</button></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="@EditNpc">Редактировать НПС</button>
         <button class="btn btn-primary" @onclick="@DeleteNpc">Удалить НПС</button>
     </div>
-    if (_npc.StartingQuests.Any())
+    if (StartingQuests.Any())
     {
         <br />
         <br />
@@ -35,7 +36,7 @@ else
             </CascadingValue>
         }
     }
-    if (_npc.EndingQuests.Any())
+    if (EndingQuests.Any())
     {
         <br />
         <br />
@@ -48,15 +49,31 @@ else
             </CascadingValue>
         }
     }
+    if (ItemsOnStart.Any())
+    {
+        <br />
+        <br />
+        <hr />
+        <h2>Список квестовых предметов на старте <button class="btn btn-primary" @onclick="@ToggleItemsOnStartTable">@(!_hideItemsOnStartTable ? "Скрыть" : "Показать")</button> </h2>
+        @if (!_hideItemsOnStartTable)
+        {
+            <CascadingValue Value=@ItemsOnStart>
+                <QuestItemTableForNpc />
+            </CascadingValue>
+        }
+    }
 }
 
 @code {
     private string _message = "Загрузка...";
-    private Npc _npc;
+    private NpcInfoView _npc;
+    private Npc Npc { get; set; }
     private List<Quest> StartingQuests { get; set; }
     private List<Quest> EndingQuests { get; set; }
+    private List<QuestItem> ItemsOnStart { get; set; }
     private bool _hideStartingQuestTable;
     private bool _hideEndingQuestTable;
+    private bool _hideItemsOnStartTable;
 
     [Parameter]
     public int NpcId { get; set; }
@@ -65,19 +82,22 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _npc = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{NpcId}");
-        StartingQuests = _npc.StartingQuests.ToList();
-        EndingQuests = _npc.EndingQuests.ToList();
+        _npc = await Http.GetJsonAsync<NpcInfoView>($"{BaseApiUrl}/npcs/{NpcId}");
+        StartingQuests = _npc.StartingQuests;
+        EndingQuests = _npc.EndingQuests;
+        ItemsOnStart = _npc.QuestItems;
+        Npc = _npc.Npc;
         _hideStartingQuestTable = false;
         _hideEndingQuestTable = false;
+        _hideItemsOnStartTable = false;
     }
 
     private async Task DeleteNpc()
     {
-        if (_npc.StartingQuests.Any() || _npc.EndingQuests.Any())
+        if (StartingQuests.Any() || EndingQuests.Any() || ItemsOnStart.Any())
         {
             var parameters = new ModalParameters();
-            parameters.Add("Message", "ЭЭЭ! Он же квестами занимается! Удали сначала квесты.");
+            parameters.Add("Message", "ЭЭЭ! Он же квестами и предметами занимается! Удали сначала их.");
 
             Modal.Show<Notification>("Notification", parameters);
         }
@@ -103,6 +123,11 @@ else
         NavigationManager.NavigateTo($"/npcs/edit/{NpcId}");
     }
 
+    private void NavigateToLocationView(int locationId)
+    {
+        NavigationManager.NavigateTo($"/locations/{locationId}");
+    }
+
     private void ToggleStartingQuestsTable()
     {
         _hideStartingQuestTable = !_hideStartingQuestTable;
@@ -112,6 +137,12 @@ else
     private void ToggleEndingQuestsTable()
     {
         _hideEndingQuestTable = !_hideEndingQuestTable;
+        StateHasChanged();
+    }
+
+    private void ToggleItemsOnStartTable()
+    {
+        _hideItemsOnStartTable = !_hideItemsOnStartTable;
         StateHasChanged();
     }
 

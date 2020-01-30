@@ -31,7 +31,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players/full");
+        _players = await Http.GetJsonAsync<List<Player>>($"{BaseApiUrl}/players");
     }
 
     private void ChangePlayers(List<Player> players)

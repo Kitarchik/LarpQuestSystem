@@ -16,8 +16,8 @@
 }
 else
 {
-    <p><em>Название: @_location.Name</em></p>
-    <p><em>Описание: @_location.Description</em></p>
+    <p><em>Название: @_location.Location.Name</em></p>
+    <p><em>Описание: @_location.Location.Description</em></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="@EditLocation">Редактировать локацию</button>
         <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
@@ -52,7 +52,7 @@ else
 
 @code {
     private string _message = "Загрузка...";
-    private Location _location;
+    private LocationInfoView _location;
     private List<Npc> _npcs { get; set; }
     private List<Player> _players { get; set; }
     private bool _hideNpcsTable;
@@ -66,7 +66,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _location = await Http.GetJsonAsync<Location>($"{BaseApiUrl}/locations/{LocationId}");
+        _location = await Http.GetJsonAsync<LocationInfoView>($"{BaseApiUrl}/locations/{LocationId}");
         _npcs = _location.Npcs.ToList();
         _players = _location.Players.ToList();
         _hideNpcsTable = false;

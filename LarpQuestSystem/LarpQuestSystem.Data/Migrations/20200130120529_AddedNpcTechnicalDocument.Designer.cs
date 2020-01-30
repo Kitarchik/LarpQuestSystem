@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LarpQuestSystem.Data.Migrations
 {
     [DbContext(typeof(QuestContext))]
-    [Migration("20200128151139_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20200130120529_AddedNpcTechnicalDocument")]
+    partial class AddedNpcTechnicalDocument
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -55,10 +55,11 @@ namespace LarpQuestSystem.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(2000)")
+                        .HasMaxLength(2000);
 
-                    b.Property<string>("ItemType")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(250)")
@@ -253,6 +254,9 @@ namespace LarpQuestSystem.Data.Migrations
                     b.Property<bool>("IsReady")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsTechnicalDocumentReady")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
@@ -261,6 +265,9 @@ namespace LarpQuestSystem.Data.Migrations
 
                     b.Property<int>("StartingNpcId")
                         .HasColumnType("int");
+
+                    b.Property<string>("TechnicalDocumentForNpc")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -275,17 +282,24 @@ namespace LarpQuestSystem.Data.Migrations
 
             modelBuilder.Entity("LarpQuestSystem.Data.Model.QuestPlayer", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
                     b.Property<int>("QuestId")
                         .HasColumnType("int");
 
-                    b.HasKey("PlayerId", "QuestId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
 
                     b.HasIndex("QuestId");
 
-                    b.ToTable("QuestPlayer");
+                    b.ToTable("QuestPlayers");
                 });
 
             modelBuilder.Entity("LarpQuestSystem.Data.Model.Npc", b =>

@@ -15,9 +15,9 @@
 }
 else
 {
-    <p><em>Имя: @_player.Name</em></p>
-    <p><em>Описание: @_player.Description</em></p>
-    <p><em>Локация: @_player.Location.Name</em></p>
+    <p>Имя: @_player.Player.Name</p>
+    <p>Описание: @_player.Player.Description</p>
+    <p>Локация: <button class="btn btn-primary" @onclick="(() => NavigateToLocationView(_player.Player.LocationId))">@_player.Location.Name</button></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="@EditPlayer">Редактировать игрока</button>
         <button class="btn btn-primary" @onclick="@DeletePlayer">Удалить игрока</button>
@@ -35,7 +35,7 @@ else
 
 @code {
     private string _message = "Загрузка...";
-    private Player _player;
+    private PlayerInfoView _player;
     private List<Quest> Quests { get; set; }
 
     [Parameter]
@@ -45,13 +45,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _player = await Http.GetJsonAsync<Player>($"{BaseApiUrl}/players/{PlayerId}");
-        Quests = _player.QuestPlayers.Select(x => x.Quest).ToList();
+        _player = await Http.GetJsonAsync<PlayerInfoView>($"{BaseApiUrl}/players/{PlayerId}");
+        Quests = _player.Quests;
     }
 
     private async Task DeletePlayer()
     {
-        if (_player.QuestPlayers.Any())
+        if (Quests.Any())
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "ЭЭЭ! Он же квестами занимается! Удали сначала квесты.");
@@ -78,6 +78,11 @@ else
     private void EditPlayer()
     {
         NavigationManager.NavigateTo($"/players/edit/{PlayerId}");
+    }
+
+    private void NavigateToLocationView(int locationId)
+    {
+        NavigationManager.NavigateTo($"/locations/{locationId}");
     }
 
 }

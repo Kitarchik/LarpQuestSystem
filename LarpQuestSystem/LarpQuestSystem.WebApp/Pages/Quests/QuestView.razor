@@ -3,6 +3,7 @@
 @using LarpQuestSystem.WebApp.Components.Utils
 @using LarpQuestSystem.WebApp.Components.Players
 @using LarpQuestSystem.WebApp.Components.Chains
+@using LarpQuestSystem.WebApp.Components.Items
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -39,8 +40,8 @@ else
         <em>Готовность по печати: @GetStatus(_quest.IsPrinted)</em>
         <button class="btn btn-primary" @onclick="@ChangePrintedStatus"> Сменить статус </button>
     </p>
-    <p><em>Квест выдает: @_quest.QuestGiver.Name</em></p>
-    <p><em>Квест принимает: @_quest.QuestEnding.Name</em></p>
+    <p><em>Квест выдает: @_questGiver.Name</em></p>
+    <p><em>Квест принимает: @_questEnding.Name</em></p>
     <p><em>Количество копий в печать: @_quest.AmountToPrint</em></p>
     <p><em>Сложность: @GetComplexity(_quest.Complexity)</em></p>
     <p><em>Градация: @GetGrade(_quest.Complexity)</em></p>
@@ -48,7 +49,7 @@ else
         <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
         <button class="btn btn-primary" @onclick="@DeleteQuest">Удалить квест</button>
     </div>
-    @if (_quest.QuestChains.Any())
+    @if (_chains.Any())
     {
         <br />
         <br />
@@ -61,7 +62,7 @@ else
             </CascadingValue>
         }
     }
-    @if (_quest.QuestPlayers.Any())
+    @if (_players.Any())
     {
         <br />
         <br />
@@ -74,15 +75,33 @@ else
             </CascadingValue>
         }
     }
+    @if (_items.Any())
+    {
+        <br />
+        <br />
+        <hr />
+        <h2>Предметы, участвующие в квесте.<button class="btn btn-primary" @onclick="@ToggleItemsTable">@(!_hideItemsTable ? "Скрыть" : "Показать")</button></h2>
+        @if (!_hideItemsTable)
+        {
+            <CascadingValue Value=@_items>
+                <QuestItemsTable />
+            </CascadingValue>
+        }
+    }
 }
 
 @code {
     private string _message = "Загрузка...";
+    private QuestInfoView _questView;
     private Quest _quest;
     private List<Player> _players;
     private List<Chain> _chains;
+    private List<QuestItem> _items;
+    private Npc _questGiver;
+    private Npc _questEnding;
     private bool _hideChainsTable;
     private bool _hidePlayersTable;
+    private bool _hideItemsTable;
 
     [Parameter]
     public int QuestId { get; set; }
@@ -91,16 +110,21 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _quest = await Http.GetJsonAsync<Quest>($"{BaseApiUrl}/quests/{QuestId}");
-        _players = _quest.QuestPlayers.Select(x => x.Player).ToList();
-        _chains = _quest.QuestChains.Select(x => x.Chain).ToList();
+        _questView = await Http.GetJsonAsync<QuestInfoView>($"{BaseApiUrl}/quests/{QuestId}");
+        _quest = _questView.Quest;
+        _players = _questView.Players;
+        _chains = _questView.Chains;
+        _items = _questView.QuestItems;
+        _questGiver = _questView.QuestGiver;
+        _questEnding = _questView.QuestEnding;
         _hidePlayersTable = false;
         _hideChainsTable = false;
+        _hideItemsTable = false;
     }
 
     private async Task DeleteQuest()
     {
-        if (_quest.QuestChains.Any())
+        if (_chains.Any())
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Этот квест участвует в цепочке. Сначала удалите его из цепочки.");
@@ -109,10 +133,6 @@ else
         }
         else
         {
-            foreach (var questPlayers in _quest.QuestPlayers)
-            {
-                await Http.DeleteAsync($"{BaseApiUrl}/questPlayers/{questPlayers.Id}");
-            }
             var response = await Http.DeleteAsync($"{BaseApiUrl}/quests/{QuestId}");
             if (response.IsSuccessStatusCode)
             {
@@ -190,6 +210,12 @@ else
     private void TogglePlayersTable()
     {
         _hidePlayersTable = !_hidePlayersTable;
+        StateHasChanged();
+    }
+
+    private void ToggleItemsTable()
+    {
+        _hideItemsTable = !_hideItemsTable;
         StateHasChanged();
     }
 

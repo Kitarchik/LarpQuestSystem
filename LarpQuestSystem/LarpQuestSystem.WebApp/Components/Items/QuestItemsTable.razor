@@ -1,0 +1,90 @@
+﻿@using LarpQuestSystem.Data.Model
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByItem" @bind-value="@ItemFilter" @bind-value:event="oninput" placeholder="Название предмета" />
+<input type="text" id="filterByNpc" @bind-value="@NpcFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Название предмета</th>
+            <th>У какого НПС на старте игры</th>
+            <th>Требуемое количество предметов</th>
+            <th>Готовность предметов</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var questItem in _filteredItems)
+        {
+            <tr>
+                <td><button class="btn btn-primary" @onclick="(() => NavigateToItemView(questItem.ItemId))">@questItem.Item.Name</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => NavigateToNpcView(questItem.StartingNpcId))">@questItem.StartingNpc.Name</button></td>
+                <td>@questItem.AmountNeeded</td>
+                <td>
+                    @if (questItem.IsReady)
+                    {
+                        <span class="oi oi-check" aria-hidden="true"></span>
+                    }
+                    else
+                    {
+                        <span class="oi oi-ban" aria-hidden="true"></span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+                   {
+    private List<QuestItem> _filteredItems;
+    private string _itemFilter = string.Empty;
+    private string _npcFilter = string.Empty;
+    [CascadingParameter]
+    private List<QuestItem> Items { get; set; }
+
+    public string ItemFilter
+    {
+        get => _itemFilter;
+        set
+        {
+            _itemFilter = value;
+            FilterItems();
+        }
+    }
+
+    public string NpcFilter
+    {
+        get => _npcFilter;
+        set
+        {
+            _npcFilter = value;
+            FilterItems();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredItems = Items;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterItems()
+    {
+        _filteredItems = Items
+            .Where(x => x.Quest.Name.Contains(_itemFilter, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.StartingNpc.Name.Contains(_npcFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToItemView(int itemId)
+    {
+        NavigationManager.NavigateTo($"/items/{itemId}");
+    }
+
+    private void NavigateToNpcView(int npcId)
+    {
+        NavigationManager.NavigateTo($"/npcs/{npcId}");
+    }
+
+}

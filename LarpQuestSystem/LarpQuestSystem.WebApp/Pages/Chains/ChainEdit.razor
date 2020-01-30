@@ -35,21 +35,8 @@ else
         </div>
     }
     <div class="form-group row">
-        <label for="txtQuestFilter" class="col-sm-2 col-form-label">Фильтр</label>
-        <div class="col-sm-10">
-            <input type="text" id="txtQuestFilter" @bind-value="@QuestFilter" @bind-value:event="oninput" placeholder="Название квеста" />
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="nextQuest" class="col-sm-2 col-form-label">Следующий квест</label>
-        <div class="col-sm-10">
-            <select id="nextQuest" size="5" @onchange="@SelectQuest">
-                @foreach (var quest in _filteredQuests)
-                {
-                    <option value="@quest.Id">@quest.Name</option>
-                }
-            </select>
-        </div>
+        <label class="col-sm-2 col-form-label">Следующий шаг</label>
+        <FilterItems Items="@_quests.Select(x=>x.Name).ToList()" OnItemSelect="@SelectQuest" />
     </div>
     <div class="form-group row">
         <button class="btn btn-primary" @onclick="@IncreaseSteps">Добавить шаг</button>
@@ -68,28 +55,7 @@ else
     private List<QuestChain> _initialQuestChains;
     private List<Quest> _selectedQuests;
     private List<Quest> _quests;
-    private List<Quest> _filteredQuests;
     private Quest _selectedQuest;
-
-    private string _questFilter = string.Empty;
-
-    public string QuestFilter
-    {
-        get => _questFilter;
-        set
-        {
-            _questFilter = value;
-            FilterQuests();
-        }
-    }
-
-    private void FilterQuests()
-    {
-        _filteredQuests = _quests
-            .Where(x => x.Name.Contains(QuestFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        StateHasChanged();
-    }
 
     [Parameter]
     public int ChainId { get; set; }
@@ -102,7 +68,6 @@ else
         _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
         _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
         _quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
-        _filteredQuests = _quests;
         _initialQuestChains = _chain.QuestChains.OrderBy(x => x.StepNumber).ToList();
         _selectedQuests = _initialQuestChains.Select(x => _quests.FirstOrDefault(x1 => x1.Id == x.QuestId)).ToList();
     }
@@ -158,6 +123,11 @@ else
         }
     }
 
+    private void SelectQuest(string questName)
+    {
+        _selectedQuest = _quests.First(x => x.Name == questName);
+    }
+
     private void IncreaseSteps()
     {
         if (_selectedQuest != null && _selectedQuest.Id > 0)
@@ -168,6 +138,7 @@ else
                 Name = _selectedQuest.Name,
             });
         }
+        _selectedQuest = null;
         StateHasChanged();
     }
 
@@ -178,12 +149,6 @@ else
             _selectedQuests.RemoveAt(_selectedQuests.Count - 1);
             StateHasChanged();
         }
-    }
-
-    private void SelectQuest(ChangeEventArgs e)
-    {
-        var questId = int.Parse(e.Value.ToString());
-        _selectedQuest = _quests.FirstOrDefault(x => x.Id == questId);
     }
 
     private void Cancel()

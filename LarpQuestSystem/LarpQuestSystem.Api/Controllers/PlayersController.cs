@@ -25,27 +25,47 @@ namespace LarpQuestSystem.Api.Controllers
             return await _db.Players.ToListAsync();
         }
 
-        [HttpGet("full")]
-        public async Task<ActionResult<IEnumerable<Player>>> GetFull()
-        {
-            return await _db.Players
-                .Include(x => x.Location)
-                .Include(x => x.QuestPlayers)
-                .ThenInclude(x => x.Quest)
-                .ToListAsync();
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Player>> Get(int id)
+        public async Task<ActionResult<PlayerInfoView>> Get(int id)
         {
-            Player player = await _db.Players
-                .Include(x => x.Location)
-                .Include(x=>x.QuestPlayers)
-                .ThenInclude(x=>x.Quest)
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var player = await _db.Players
+                    .Include(x => x.Location)
+                    .Include(x => x.QuestPlayers)
+                    .ThenInclude(x => x.Quest)
+                    .FirstOrDefaultAsync(x => x.Id == id);
             if (player == null)
                 return NotFound();
-            return new ObjectResult(player);
+            var playerInfo = new PlayerInfoView
+            {
+                Player = new Player
+                {
+                    Id = player.Id,
+                    Name = player.Name,
+                    Description = player.Description,
+                    LocationId = player.LocationId
+                },
+                Location = new Location
+                {
+                    Description = player.Location.Description,
+                    Id = player.Location.Id,
+                    Name = player.Location.Name,
+                },
+                Quests = player.QuestPlayers.Select(x => x.Quest).Select(q => new Quest
+                {
+                    AmountToPrint = q.AmountToPrint,
+                    ArtisticTextLink = q.ArtisticTextLink,
+                    Complexity = q.Complexity,
+                    Description = q.Description,
+                    Grade = q.Grade,
+                    Id = q.Id,
+                    IsArtisticTextReady = q.IsArtisticTextReady,
+                    Name = q.Name,
+                    TechnicalDescriptionLink = q.TechnicalDescriptionLink,
+                    IsTechnicalDescriptionReady = q.IsTechnicalDescriptionReady,
+                    IsPrinted = q.IsPrinted,
+                }).ToList(),
+            };
+            return new ObjectResult(playerInfo);
         }
 
         [HttpPost]

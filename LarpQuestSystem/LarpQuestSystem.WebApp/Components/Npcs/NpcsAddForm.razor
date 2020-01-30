@@ -31,21 +31,8 @@ else
             </div>
         </div>
         <div class="form-group row">
-            <label for="txtLocationFilter" class="col-sm-2 col-form-label">Фильтр локаций: </label>
-            <div class="col-sm-10">
-                <input type="text" id="txtLocationFilter" @bind-value="@LocationFilter" @bind-value:event="oninput" placeholder="Название локации" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtNpcLocation" class="col-sm-2 col-form-label">Локация</label>
-            <div class="col-sm-10">
-                <select id="txtNpcLocation" size="5" @bind="_npcToAdd.LocationId">
-                    @foreach (var location in _filteredLocations)
-                    {
-                        <option value="@location.Id">@location.Name</option>
-                    }
-                </select>
-            </div>
+            <label class="col-sm-2 col-form-label">Выберите локацию: </label>
+            <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" OnItemSelect="@SelectLocation" />
         </div>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Сохранить</button>
@@ -65,34 +52,13 @@ else
     public Action<List<Npc>> OnNpcsChange { get; set; }
 
     private List<Location> _locations { get; set; }
-    private List<Location> _filteredLocations { get; set; }
     private Npc _npcToAdd;
     private bool _showForm;
-    private string _locationFilter = string.Empty;
-
-    public string LocationFilter
-    {
-        get => _locationFilter;
-        set
-        {
-            _locationFilter = value;
-            FilterLocations();
-        }
-    }
-
-    private void FilterLocations()
-    {
-        _filteredLocations = _locations
-            .Where(x => x.Name.Contains(LocationFilter, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        StateHasChanged();
-    }
 
     protected override async Task OnInitializedAsync()
     {
         _npcToAdd = new Npc();
         _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
-        _filteredLocations = _locations;
     }
 
     private void ShowForm()
@@ -104,6 +70,7 @@ else
     private void HideForm()
     {
         _showForm = false;
+        _npcToAdd=new Npc();
         StateHasChanged();
     }
 
@@ -116,7 +83,7 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
-        else if (_npcToAdd.LocationId < 1 || !_filteredLocations.Exists(x => x.Id == _npcToAdd.LocationId))
+        else if (_npcToAdd.LocationId < 1 || !_locations.Exists(x => x.Id == _npcToAdd.LocationId))
         {
             var parameters = new ModalParameters();
             parameters.Add("Message", "Выберите локацию.");
@@ -143,7 +110,7 @@ else
                 var jsonTask = response.Content.ReadAsStringAsync();
                 jsonTask.Wait();
                 _npcToAdd = JsonConvert.DeserializeObject<Npc>(jsonTask.Result);
-                await ChangeNpcs();
+                ChangeNpcs();
                 _npcToAdd = new Npc();
                 _showForm = false;
                 StateHasChanged();
@@ -159,10 +126,14 @@ else
         }
     }
 
-    private async Task ChangeNpcs()
+    private void SelectLocation(string locationName)
     {
-        var newNpc = await Http.GetJsonAsync<Npc>($"{BaseApiUrl}/npcs/{_npcToAdd.Id}");
-        Npcs.Add(newNpc);
+        _npcToAdd.LocationId = _locations.First(x => x.Name == locationName).Id;
+    }
+
+    private void ChangeNpcs()
+    {
+        Npcs.Add(_npcToAdd);
         OnNpcsChange?.Invoke(Npcs);
     }
 }

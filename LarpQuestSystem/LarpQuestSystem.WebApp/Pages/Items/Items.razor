@@ -1,0 +1,42 @@
+﻿@page "/items"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components.Items
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Квестовые предметы</h1>
+
+@if (_items == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_items>
+        <ItemsAddForm OnItemsChange="@ChangeItems" />
+        <br />
+        <br />
+        <hr />
+        <h2>Таблица квестовых предметов</h2>
+        <ItemsTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Item> _items { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Http.GetJsonAsync<List<Item>>($"{BaseApiUrl}/items");
+    }
+
+    private void ChangeItems(List<Item> items)
+    {
+        _items = items;
+        StateHasChanged();
+    }
+}

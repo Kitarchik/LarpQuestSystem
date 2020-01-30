@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public int AmountNeeded { get; set; }
         public bool IsReady { get; set; }
+        public string TechnicalDocumentForNpc { get; set; }
+        public bool IsTechnicalDocumentReady { get; set; }
         public int QuestId { get; set; }
         public int ItemId { get; set; }
         public int StartingNpcId { get; set; }
