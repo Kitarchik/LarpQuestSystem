@@ -14,8 +14,8 @@
 }
 else
 {
-    <p><em>Название: @_chain.Name</em></p>
-    <p><em>Описание: @_chain.Description</em></p>
+    <p><em>Название: @_chain.Chain.Name</em></p>
+    <p><em>Описание: @_chain.Chain.Description</em></p>
     <div style="margin-bottom: 10px">
         <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
         <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
@@ -46,7 +46,7 @@ else
 @code
 {
     private string _message = "Загрузка...";
-    private Chain _chain;
+    private ChainInfoView _chain;
 
     [Parameter]
     public int ChainId { get; set; }
@@ -55,7 +55,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _chain = await Http.GetJsonAsync<Chain>($"{BaseApiUrl}/chains/{ChainId}");
+        _chain = await Http.GetJsonAsync<ChainInfoView>($"{BaseApiUrl}/chains/{ChainId}");
     }
 
     private async Task DeleteChain()

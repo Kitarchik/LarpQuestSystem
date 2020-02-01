@@ -102,6 +102,11 @@ namespace LarpQuestSystem.Api.Controllers
                         Id = x.ItemId,
                         Name = x.Item.Name,
                     },
+                    Quest = new Quest
+                    {
+                        Id=x.QuestId,
+                        Name=x.Quest.Name,
+                    },
                 }).ToList(),
             };
 

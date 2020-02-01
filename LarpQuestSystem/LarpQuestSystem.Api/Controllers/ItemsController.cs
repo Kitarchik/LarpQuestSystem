@@ -63,6 +63,11 @@ namespace LarpQuestSystem.Api.Controllers
                         Id = x.StartingNpcId,
                         Name = x.StartingNpc.Name,
                     },
+                    Item = new Item
+                    {
+                        Id=x.ItemId,
+                        Name = x.Item.Name,
+                    },
                 }).ToList(),
             };
             return new ObjectResult(itemInfo);

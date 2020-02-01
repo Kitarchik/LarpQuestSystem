@@ -109,21 +109,37 @@ else
 
     }
     <div class="form-group row">
-        <div class="col-sm-10">
-            <label class="col-sm-2 col-form-label">Выберите предмет</label>
-            <FilterItems Items="@_items.Select(x=>x.Name).ToList()" OnItemSelect="@SelectItem" />
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label class="col-sm-2 col-form-label">Выберите предмет</label>
+            </div>
+            <div class="row col-sm">
+                <FilterItems Items="@_items.Select(x=>x.Name).ToList()" OnItemSelect="@SelectItem" />
+            </div>
         </div>
-        <div class="col-sm-10">
-            <label class="col-sm-2 col-form-label">Выберите НПС у которого он хранится</label>
-            <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" OnItemSelect="@SelectNpcForItem" />
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label class="col-sm-2 col-form-label">Выберите НПС у которого он хранится</label>
+            </div>
+            <div class="row col-sm">
+                <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" OnItemSelect="@SelectNpcForItem" />
+            </div>
         </div>
-        <div class="col-sm-10">
-            <label for="txtItemAmount" class="col-sm-2 col-form-label">Требуемое количество предметов: </label>
-            <input type="text" id="txtItemAmount" @bind="@_itemAmountNeeded" />
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label for="txtItemAmount" class="col-sm-2 col-form-label">Требуемое количество предметов: </label>
+            </div>
+            <div class="row col-sm">
+                <input type="text" id="txtItemAmount" @bind="@_itemAmountNeeded" />
+            </div>
         </div>
-        <div class="col-sm-10">
-            <label for="txtTechnicalDocument" class="col-sm-2 col-form-label">Технический документ для НПС: </label>
-            <input type="text" id="txtTechnicalDocument" @bind="@_itemTechnicalDocument" />
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label for="txtTechnicalDocument" class="col-sm-2 col-form-label">Технический документ для НПС: </label>
+            </div>
+            <div class="row col-sm">
+                <input type="text" id="txtTechnicalDocument" @bind="@_itemTechnicalDocument" />
+            </div>
         </div>
     </div>
     <div class="form-group">

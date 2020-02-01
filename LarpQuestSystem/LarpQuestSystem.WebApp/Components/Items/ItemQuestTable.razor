@@ -3,11 +3,13 @@
 
 <input type="text" id="filterByQuest" @bind-value="@QuestFilter" @bind-value:event="oninput" placeholder="Название квеста" />
 <input type="text" id="filterByNpc" @bind-value="@NpcFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
+<input type="text" id="filterByItem" @bind-value="@ItemFilter" @bind-value:event="oninput" placeholder="Название предмета" />
 <table class="table">
     <thead>
         <tr>
             <th>Название квеста</th>
             <th>У какого НПС на старте игры</th>
+            <th>Название предмета</th>
             <th>Требуемое количество предметов</th>
             <th>Готовность предметов</th>
         </tr>
@@ -18,6 +20,7 @@
             <tr>
                 <td><button class="btn btn-primary" @onclick="(() => NavigateToQuestView(questItem.Quest.Id))">@questItem.Quest.Name</button></td>
                 <td><button class="btn btn-primary" @onclick="(() => NavigateToNpcView(questItem.StartingNpc.Id))">@questItem.StartingNpc.Name</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => NavigateToItemView(questItem.Item.Id))">@questItem.Item.Name</button></td>
                 <td>@questItem.AmountNeeded</td>
                 <td>
                     @if (questItem.IsReady)
@@ -39,6 +42,7 @@
     private List<QuestItem> _filteredItems;
     private string _questFilter = string.Empty;
     private string _npcFilter = string.Empty;
+    private string _itemFilter = string.Empty;
     [CascadingParameter]
     private List<QuestItem> Items { get; set; }
 
@@ -62,6 +66,16 @@
         }
     }
 
+    public string ItemFilter
+    {
+        get => _itemFilter;
+        set
+        {
+            _itemFilter = value;
+            FilterItems();
+        }
+    }
+
     protected override Task OnParametersSetAsync()
     {
         _filteredItems = Items;
@@ -73,6 +87,7 @@
         _filteredItems = Items
             .Where(x => x.Quest.Name.Contains(_questFilter, StringComparison.OrdinalIgnoreCase))
             .Where(x => x.StartingNpc.Name.Contains(_npcFilter, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.Item.Name.Contains(_itemFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
         StateHasChanged();
     }
@@ -87,4 +102,8 @@
         NavigationManager.NavigateTo($"/npcs/{npcId}");
     }
 
+    private void NavigateToItemView(int itemId)
+    {
+        NavigationManager.NavigateTo($"/items/{itemId}");
+    }
 }
