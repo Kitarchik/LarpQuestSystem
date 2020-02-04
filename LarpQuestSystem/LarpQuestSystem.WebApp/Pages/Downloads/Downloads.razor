@@ -1,0 +1,163 @@
+﻿@page "/downloads"
+@using System.Threading
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components.Quests
+@using LarpQuestSystem.WebApp.Components.Utils
+@using LarpQuestSystem.WebApp.Components.Items
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<h1>Локальное хранение данных</h1>
+
+@if (Quests == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="@DownloadArtisticTexts">Скачать художественные тексты для квестов</button>
+    <button class="btn btn-primary" @onclick="@DownloadTechnicalTexts">Скачать технические тексты для квестов</button>
+    <button class="btn btn-primary" @onclick="@DownloadTechnicalItemTexts">Скачать технические тексты для предметов</button>
+    @if (NotDownloadedArtistic.Any())
+    {
+        <CascadingValue Value=@NotDownloadedArtistic>
+            <h2>Нескачанные художественные тексты</h2>
+            <QuestsShortTable />
+        </CascadingValue>
+    }
+    @if (NotDownloadedTechnical.Any())
+    {
+        <CascadingValue Value=@NotDownloadedTechnical>
+            <h2>Нескачанные технические тексты</h2>
+            <QuestsShortTable />
+        </CascadingValue>
+    }
+    @if (NotDownloadedItemTechnical.Any())
+    {
+        <CascadingValue Value=@NotDownloadedItemTechnical>
+            <h2>Нескачанные технические тексты для предметов</h2>
+            <ItemQuestTable />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private List<Quest> Quests { get; set; }
+    private List<QuestItem> QuestItems { get; set; }
+    private List<Quest> NotDownloadedArtistic { get; set; }
+    private List<Quest> NotDownloadedTechnical { get; set; }
+    private List<QuestItem> NotDownloadedItemTechnical { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
+        QuestItems = await Http.GetJsonAsync<List<QuestItem>>($"{BaseApiUrl}/questItems");
+        NotDownloadedArtistic = new List<Quest>();
+        NotDownloadedTechnical = new List<Quest>();
+        NotDownloadedItemTechnical = new List<QuestItem>();
+    }
+
+    private async Task<List<Quest>> GetArtisticTextsForDownload()
+    {
+        NotDownloadedArtistic = new List<Quest>();
+        NotDownloadedTechnical = new List<Quest>();
+        NotDownloadedItemTechnical = new List<QuestItem>();
+        var questsToDownload = new List<Quest>();
+        foreach (var quest in Quests)
+        {
+            var response = await Http.GetAsync($"{BaseApiUrl}/download/artistic/ready/{quest.Id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                NotDownloadedArtistic.Add(quest);
+                StateHasChanged();
+            }
+            else
+            {
+                questsToDownload.Add(quest);
+            }
+        }
+        return questsToDownload;
+    }
+
+    private async Task DownloadArtisticTexts()
+    {
+        var quests = await GetArtisticTextsForDownload();
+        foreach (var quest in quests)
+        {
+            NavigationManager.NavigateTo($"{BaseApiUrl}/download/artistic/{quest.Id}", true);
+            Thread.Sleep(1000);
+        }
+    }
+
+    private async Task<List<Quest>> GetTechnicalTextsForDownload()
+    {
+        NotDownloadedArtistic = new List<Quest>();
+        NotDownloadedTechnical = new List<Quest>();
+        NotDownloadedItemTechnical = new List<QuestItem>();
+        var questsToDownload = new List<Quest>();
+        foreach (var quest in Quests)
+        {
+            var response = await Http.GetAsync($"{BaseApiUrl}/download/technical/ready/{quest.Id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                NotDownloadedTechnical.Add(quest);
+                StateHasChanged();
+            }
+            else
+            {
+                questsToDownload.Add(quest);
+            }
+        }
+        return questsToDownload;
+    }
+
+    private async Task DownloadTechnicalTexts()
+    {
+        var quests = await GetTechnicalTextsForDownload();
+        foreach (var quest in quests)
+        {
+            NavigationManager.NavigateTo($"{BaseApiUrl}/download/technical/{quest.Id}", true);
+            Thread.Sleep(1000);
+        }
+    }
+
+    private async Task<List<QuestItem>> GetTechnicalItemTextsForDownload()
+    {
+        NotDownloadedArtistic = new List<Quest>();
+        NotDownloadedTechnical = new List<Quest>();
+        NotDownloadedItemTechnical = new List<QuestItem>();
+        var questItemsToDownload = new List<QuestItem>();
+        foreach (var questItem in QuestItems)
+        {
+            var response = await Http.GetAsync($"{BaseApiUrl}/download/technicalItem/ready/{questItem.Id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                NotDownloadedItemTechnical.Add(questItem);
+                StateHasChanged();
+            }
+            else
+            {
+                questItemsToDownload.Add(questItem);
+            }
+        }
+        return questItemsToDownload;
+    }
+
+    private async Task DownloadTechnicalItemTexts()
+    {
+        var questItems = await GetTechnicalItemTextsForDownload();
+        foreach (var questItem in questItems)
+        {
+            NavigationManager.NavigateTo($"{BaseApiUrl}/download/technicalItem/{questItem.Id}", true);
+            Thread.Sleep(1000);
+        }
+    }
+}

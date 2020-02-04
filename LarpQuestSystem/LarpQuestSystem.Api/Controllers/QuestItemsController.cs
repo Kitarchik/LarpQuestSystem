@@ -1,4 +1,5 @@
-﻿using LarpQuestSystem.Data;
+﻿using System;
+using LarpQuestSystem.Data;
 using LarpQuestSystem.Data.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,20 +59,45 @@ namespace LarpQuestSystem.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<QuestItem>> Put(QuestItem item)
+        public async Task<ActionResult<QuestItem>> Put(QuestItem questItem)
         {
-            if (item == null)
+            if (questItem == null)
             {
                 return BadRequest();
             }
-            if (!_db.QuestItems.Any(x => x.Id == item.Id))
+            if (!_db.QuestItems.Any(x => x.Id == questItem.Id))
             {
                 return NotFound();
             }
 
-            _db.Update(item);
-            await _db.SaveChangesAsync();
-            return Ok(item);
+            var itemId = _db.QuestItems.AsNoTracking().First(x => x.Id == questItem.Id).ItemId;
+            var amountReady = _db.Items.AsNoTracking().First(x => x.Id == itemId).AmountReady;
+            var amountReserved = _db.QuestItems
+                .AsNoTracking()
+                .Where(x => x.ItemId == itemId && x.Id != questItem.Id && x.IsReady)
+                .Sum(x => x.AmountNeeded);
+            questItem.IsReady = amountReady - amountReserved >= questItem.AmountNeeded;
+            questItem.Quest = null;
+            questItem.StartingNpc = null;
+            questItem.Item = null;
+            try
+            {
+                _db.Update(questItem);
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+
+            }
+            return Ok(questItem);
         }
 
         [HttpDelete("{id}")]

@@ -1,5 +1,9 @@
-﻿@using LarpQuestSystem.Data.Model
+﻿@using System.Net
+@using LarpQuestSystem.Data.Model
+
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 
 <input type="text" id="filterByQuest" @bind-value="@QuestFilter" @bind-value:event="oninput" placeholder="Название квеста" />
 <input type="text" id="filterByNpc" @bind-value="@NpcFilter" @bind-value:event="oninput" placeholder="Имя НПС" />
@@ -7,9 +11,12 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Редактировать квестовый предмет</th>
             <th>Название квеста</th>
             <th>У какого НПС на старте игры</th>
             <th>Название предмета</th>
+            <th>Технический документ</th>
+            <th>Готовность тех документа</th>
             <th>Требуемое количество предметов</th>
             <th>Готовность предметов</th>
         </tr>
@@ -18,9 +25,27 @@
         @foreach (var questItem in _filteredItems)
         {
             <tr>
+                <td><button class="btn btn-primary" @onclick="(() => NavigateToQuestItemView(questItem.Id))"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать предмет</button></td>
                 <td><button class="btn btn-primary" @onclick="(() => NavigateToQuestView(questItem.Quest.Id))">@questItem.Quest.Name</button></td>
                 <td><button class="btn btn-primary" @onclick="(() => NavigateToNpcView(questItem.StartingNpc.Id))">@questItem.StartingNpc.Name</button></td>
                 <td><button class="btn btn-primary" @onclick="(() => NavigateToItemView(questItem.Item.Id))">@questItem.Item.Name</button></td>
+                <td>
+                    @if (!string.IsNullOrEmpty(questItem.TechnicalDocumentForNpc))
+                    {
+                        <button class="btn btn-primary" @onclick="(() => EditTechnicalDocument(questItem.TechnicalDocumentForNpc))"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
+                        <button class="btn btn-primary" @onclick="(() => ChangeTechnicalDocumentStatus(questItem))"> Сменить статус </button>
+                    }
+                </td>
+                <td>
+                    @if (questItem.IsTechnicalDocumentReady)
+                    {
+                        <span class="oi oi-check" aria-hidden="true"></span>
+                    }
+                    else
+                    {
+                        <span class="oi oi-ban" aria-hidden="true"></span>
+                    }
+                </td>
                 <td>@questItem.AmountNeeded</td>
                 <td>
                     @if (questItem.IsReady)
@@ -45,6 +70,8 @@
     private string _itemFilter = string.Empty;
     [CascadingParameter]
     private List<QuestItem> Items { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     public string QuestFilter
     {
@@ -97,6 +124,11 @@
         NavigationManager.NavigateTo($"/quests/{questId}");
     }
 
+    private void NavigateToQuestItemView(int questItemId)
+    {
+        NavigationManager.NavigateTo($"/questItems/edit/{questItemId}");
+    }
+
     private void NavigateToNpcView(int npcId)
     {
         NavigationManager.NavigateTo($"/npcs/{npcId}");
@@ -105,5 +137,17 @@
     private void NavigateToItemView(int itemId)
     {
         NavigationManager.NavigateTo($"/items/{itemId}");
+    }
+
+    private void EditTechnicalDocument(string link)
+    {
+        JsRuntime.InvokeAsync<object>("open", link, "_black");
+    }
+
+    private async Task ChangeTechnicalDocumentStatus(QuestItem item)
+    {
+        item.IsTechnicalDocumentReady = !item.IsTechnicalDocumentReady;
+        await Http.PutJsonAsync<QuestItem>($"{BaseApiUrl}/questItems", item);
+        StateHasChanged();
     }
 }
