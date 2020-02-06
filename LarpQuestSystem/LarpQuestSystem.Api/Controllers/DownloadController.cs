@@ -37,19 +37,9 @@ namespace LarpQuestSystem.Api.Controllers
             }
 
             var request = _driveService.Files.Export(fileId, @"application/vnd.openxmlformats-officedocument.wordprocessingml.document").ExecuteAsStream();
-            var cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = $"{quest.Name} Artistic.docx",
-                Inline = false,
-            };
-            var ct = new System.Net.Mime.ContentType
-            {
-                MediaType = "application/vnd.ms-word",
-            };
-            Response.Headers.Add("Content-Disposition", cd.ToString());
-            Response.Headers.Add("Content-Type", ct.ToString());
+
             return File(request,
-                @"application/vnd.ms-word");
+                @"application/vnd.ms-word", $"{quest.Name} Artistic.docx");
         }
 
         [HttpGet("artistic/ready/{id}")]
@@ -82,19 +72,9 @@ namespace LarpQuestSystem.Api.Controllers
             }
 
             var request = _driveService.Files.Export(fileId, @"application/vnd.openxmlformats-officedocument.wordprocessingml.document").ExecuteAsStream();
-            var cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = $"{quest.Name} Technical.docx",
-                Inline = false,
-            };
-            var ct = new System.Net.Mime.ContentType
-            {
-                MediaType = "application/vnd.ms-word",
-            };
-            Response.Headers.Add("Content-Disposition", cd.ToString());
-            Response.Headers.Add("Content-Type", ct.ToString());
+
             return File(request,
-                @"application/vnd.ms-word");
+                @"application/vnd.ms-word", $"{quest.Name} Technical.docx");
         }
 
         [HttpGet("technical/ready/{id}")]

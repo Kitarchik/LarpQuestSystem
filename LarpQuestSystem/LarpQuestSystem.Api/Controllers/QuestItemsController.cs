@@ -1,5 +1,4 @@
-﻿using System;
-using LarpQuestSystem.Data;
+﻿using LarpQuestSystem.Data;
 using LarpQuestSystem.Data.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -80,23 +79,9 @@ namespace LarpQuestSystem.Api.Controllers
             questItem.Quest = null;
             questItem.StartingNpc = null;
             questItem.Item = null;
-            try
-            {
-                _db.Update(questItem);
-            }
-            catch (Exception e)
-            {
 
-            }
-
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-
-            }
+            _db.Update(questItem);
+            await _db.SaveChangesAsync();
             return Ok(questItem);
         }
 
