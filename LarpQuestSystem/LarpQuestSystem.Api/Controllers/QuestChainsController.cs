@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using LarpQuestSystem.Data;
 using LarpQuestSystem.Data.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace LarpQuestSystem.Api.Controllers
 {
+    [Authorize(Policy = Policies.IsScriptWriter)]
     [Route("api/[controller]")]
     [ApiController]
     public class QuestChainsController : ControllerBase
@@ -34,6 +36,7 @@ namespace LarpQuestSystem.Api.Controllers
             return new ObjectResult(questChain);
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpPost]
         public async Task<ActionResult<QuestChain>> Post(QuestChain questChain)
         {
@@ -47,6 +50,7 @@ namespace LarpQuestSystem.Api.Controllers
             return Ok(questChain);
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpPut]
         public async Task<ActionResult<QuestChain>> Put(QuestChain questChain)
         {
@@ -64,6 +68,7 @@ namespace LarpQuestSystem.Api.Controllers
             return Ok(questChain);
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<QuestChain>> Delete(int id)
         {

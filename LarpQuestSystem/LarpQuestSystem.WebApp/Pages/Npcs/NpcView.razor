@@ -8,61 +8,65 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>НПС</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>НПС</h1>
 
-@if (_npc == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <p>Имя: @Npc.Name</p>
-    <p>Описание: @Npc.Description</p>
-    <p>Локация: <button class="btn btn-primary" @onclick="(() => NavigateToLocationView(_npc.Location.Id))">@_npc.Location.Name</button></p>
-    <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="@EditNpc">Редактировать НПС</button>
-        <button class="btn btn-primary" @onclick="@DeleteNpc">Удалить НПС</button>
-    </div>
-    if (StartingQuests.Any())
+    @if (_npc == null)
     {
-        <br />
-        <br />
-        <hr />
-        <h2>Список выдаваемых квестов <button class="btn btn-primary" @onclick="@ToggleStartingQuestsTable">@(!_hideStartingQuestTable ? "Скрыть" : "Показать")</button> </h2>
-        @if (!_hideStartingQuestTable)
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <p>Имя: @Npc.Name</p>
+        <p>Описание: @Npc.Description</p>
+        <p>Локация: <button class="btn btn-primary" @onclick="(() => NavigateToLocationView(_npc.Location.Id))">@_npc.Location.Name</button></p>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <div style="margin-bottom: 10px">
+                <button class="btn btn-primary" @onclick="@EditNpc">Редактировать НПС</button>
+                <button class="btn btn-primary" @onclick="@DeleteNpc">Удалить НПС</button>
+            </div>
+        </AuthorizeView>
+        if (StartingQuests.Any())
         {
-            <CascadingValue Value=@StartingQuests>
-                <QuestsShortTable />
-            </CascadingValue>
+            <br />
+            <br />
+            <hr />
+            <h2>Список выдаваемых квестов <button class="btn btn-primary" @onclick="@ToggleStartingQuestsTable">@(!_hideStartingQuestTable ? "Скрыть" : "Показать")</button> </h2>
+            @if (!_hideStartingQuestTable)
+            {
+                <CascadingValue Value=@StartingQuests>
+                    <QuestsShortTable />
+                </CascadingValue>
+            }
+        }
+        if (EndingQuests.Any())
+        {
+            <br />
+            <br />
+            <hr />
+            <h2>Список завершаемых квестов <button class="btn btn-primary" @onclick="@ToggleEndingQuestsTable">@(!_hideEndingQuestTable ? "Скрыть" : "Показать")</button> </h2>
+            @if (!_hideEndingQuestTable)
+            {
+                <CascadingValue Value=@EndingQuests>
+                    <QuestsShortTable />
+                </CascadingValue>
+            }
+        }
+        if (ItemsOnStart.Any())
+        {
+            <br />
+            <br />
+            <hr />
+            <h2>Список квестовых предметов на старте <button class="btn btn-primary" @onclick="@ToggleItemsOnStartTable">@(!_hideItemsOnStartTable ? "Скрыть" : "Показать")</button> </h2>
+            @if (!_hideItemsOnStartTable)
+            {
+                <CascadingValue Value=@ItemsOnStart>
+                    <ItemQuestTable />
+                </CascadingValue>
+            }
         }
     }
-    if (EndingQuests.Any())
-    {
-        <br />
-        <br />
-        <hr />
-        <h2>Список завершаемых квестов <button class="btn btn-primary" @onclick="@ToggleEndingQuestsTable">@(!_hideEndingQuestTable ? "Скрыть" : "Показать")</button> </h2>
-        @if (!_hideEndingQuestTable)
-        {
-            <CascadingValue Value=@EndingQuests>
-                <QuestsShortTable />
-            </CascadingValue>
-        }
-    }
-    if (ItemsOnStart.Any())
-    {
-        <br />
-        <br />
-        <hr />
-        <h2>Список квестовых предметов на старте <button class="btn btn-primary" @onclick="@ToggleItemsOnStartTable">@(!_hideItemsOnStartTable ? "Скрыть" : "Показать")</button> </h2>
-        @if (!_hideItemsOnStartTable)
-        {
-            <CascadingValue Value=@ItemsOnStart>
-                <ItemQuestTable />
-            </CascadingValue>
-        }
-    }
-}
+</AuthorizeView>
 
 @code {
     private string _message = "Загрузка...";

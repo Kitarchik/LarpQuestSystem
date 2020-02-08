@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountsController : ControllerBase
@@ -17,6 +19,7 @@ namespace LarpQuestSystem.Api.Controllers
             _userManager = userManager;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Post(RegisterModel model)
         {
@@ -28,7 +31,7 @@ namespace LarpQuestSystem.Api.Controllers
             {
                 var errors = result.Errors.Select(x => x.Description);
 
-                return BadRequest(new RegisterResult { Successful = false, Errors = errors });
+                return Ok(new RegisterResult { Successful = false, Errors = errors });
             }
 
             // Add all new users to the User role

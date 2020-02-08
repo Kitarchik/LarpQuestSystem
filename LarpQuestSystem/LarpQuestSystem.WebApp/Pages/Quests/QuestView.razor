@@ -11,85 +11,89 @@
 @inject IModalService Modal
 @inject IJSRuntime JsRuntime
 
-<h1>Квест</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Квест</h1>
 
-@if (_quest == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <p>Имя: @_quest.Name</p>
-    <p>Описание: @_quest.Description</p>
-    <p>
-        Художественный текст: @GetStatus(_quest.IsArtisticTextReady)
-        @if (!string.IsNullOrEmpty(_quest.ArtisticTextLink))
-        {
-            <button class="btn btn-primary" @onclick="@EditArtisticTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
-            <button class="btn btn-primary" @onclick="@ChangeArtisticTextStatus"> Сменить статус </button>
-        }
-    </p>
-    <p>
-        Техническое описание: @GetStatus(_quest.IsTechnicalDescriptionReady)
-        @if (!string.IsNullOrEmpty(_quest.TechnicalDescriptionLink))
-        {
-            <button class="btn btn-primary" @onclick="@EditTechnicalTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
-            <button class="btn btn-primary" @onclick="@ChangeTechnicalTextStatus"> Сменить статус </button>
-        }
-    </p>
-    <p>
-        Готовность по печати: @GetStatus(_quest.IsPrinted)
-        <button class="btn btn-primary" @onclick="@ChangePrintedStatus"> Сменить статус </button>
-    </p>
-    <p>Квест выдает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questGiver.Id))">@_questGiver.Name</button></p>
-    <p>Квест принимает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questEnding.Id))">@_questEnding.Name</button></p>
-    <p>Количество копий в печать: @_quest.AmountToPrint</p>
-    <p>Сложность: @GetComplexity(_quest.Complexity)</p>
-    <p>Градация: @GetGrade(_quest.Complexity)</p>
-    <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
-        <button class="btn btn-primary" @onclick="@DeleteQuest">Удалить квест</button>
-    </div>
-    @if (_chains.Any())
+    @if (_quest == null)
     {
-        <br />
-        <br />
-        <hr />
-        <h2>Цепочки, в которых участвует квест <button class="btn btn-primary" @onclick="@ToggleChainsTable">@(!_hideChainsTable ? "Скрыть" : "Показать")</button></h2>
-        @if (!_hideChainsTable)
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <p>Имя: @_quest.Name</p>
+        <p>Описание: @_quest.Description</p>
+        <p>
+            Художественный текст: @GetStatus(_quest.IsArtisticTextReady)
+            @if (!string.IsNullOrEmpty(_quest.ArtisticTextLink))
+            {
+                <button class="btn btn-primary" @onclick="@EditArtisticTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
+                <button class="btn btn-primary" @onclick="@ChangeArtisticTextStatus"> Сменить статус </button>
+            }
+        </p>
+        <p>
+            Техническое описание: @GetStatus(_quest.IsTechnicalDescriptionReady)
+            @if (!string.IsNullOrEmpty(_quest.TechnicalDescriptionLink))
+            {
+                <button class="btn btn-primary" @onclick="@EditTechnicalTextDocument"> <span class="oi oi-pencil" aria-hidden="true"></span> Редактировать документ</button>
+                <button class="btn btn-primary" @onclick="@ChangeTechnicalTextStatus"> Сменить статус </button>
+            }
+        </p>
+        <p>
+            Готовность по печати: @GetStatus(_quest.IsPrinted)
+            <button class="btn btn-primary" @onclick="@ChangePrintedStatus"> Сменить статус </button>
+        </p>
+        <p>Квест выдает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questGiver.Id))">@_questGiver.Name</button></p>
+        <p>Квест принимает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questEnding.Id))">@_questEnding.Name</button></p>
+        <p>Количество копий в печать: @_quest.AmountToPrint</p>
+        <p>Сложность: @GetComplexity(_quest.Complexity)</p>
+        <p>Градация: @GetGrade(_quest.Complexity)</p>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <div style="margin-bottom: 10px">
+                <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
+                <button class="btn btn-primary" @onclick="@DeleteQuest">Удалить квест</button>
+            </div>
+        </AuthorizeView>
+        @if (_chains.Any())
         {
-            <CascadingValue Value=@_chains>
-                <ChainsTable />
-            </CascadingValue>
+            <br />
+            <br />
+            <hr />
+            <h2>Цепочки, в которых участвует квест <button class="btn btn-primary" @onclick="@ToggleChainsTable">@(!_hideChainsTable ? "Скрыть" : "Показать")</button></h2>
+            @if (!_hideChainsTable)
+            {
+                <CascadingValue Value=@_chains>
+                    <ChainsTable />
+                </CascadingValue>
+            }
+        }
+        @if (_players.Any())
+        {
+            <br />
+            <br />
+            <hr />
+            <h2>Игроки, получившие этот квест.<button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button></h2>
+            @if (!_hidePlayersTable)
+            {
+                <CascadingValue Value=@_players>
+                    <PlayersTable />
+                </CascadingValue>
+            }
+        }
+        @if (_items.Any())
+        {
+            <br />
+            <br />
+            <hr />
+            <h2>Предметы, участвующие в квесте.<button class="btn btn-primary" @onclick="@ToggleItemsTable">@(!_hideItemsTable ? "Скрыть" : "Показать")</button></h2>
+            @if (!_hideItemsTable)
+            {
+                <CascadingValue Value=@_items>
+                    <ItemQuestTable />
+                </CascadingValue>
+            }
         }
     }
-    @if (_players.Any())
-    {
-        <br />
-        <br />
-        <hr />
-        <h2>Игроки, получившие этот квест.<button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button></h2>
-        @if (!_hidePlayersTable)
-        {
-            <CascadingValue Value=@_players>
-                <PlayersTable />
-            </CascadingValue>
-        }
-    }
-    @if (_items.Any())
-    {
-        <br />
-        <br />
-        <hr />
-        <h2>Предметы, участвующие в квесте.<button class="btn btn-primary" @onclick="@ToggleItemsTable">@(!_hideItemsTable ? "Скрыть" : "Показать")</button></h2>
-        @if (!_hideItemsTable)
-        {
-            <CascadingValue Value=@_items>
-                <ItemQuestTable />
-            </CascadingValue>
-        }
-    }
-}
+</AuthorizeView>
 
 @code {
     private string _message = "Загрузка...";

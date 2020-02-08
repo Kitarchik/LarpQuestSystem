@@ -1,5 +1,4 @@
-﻿using System;
-using Blazored.LocalStorage;
+﻿using Blazored.LocalStorage;
 using LarpQuestSystem.Data.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -33,25 +32,18 @@ namespace LarpQuestSystem.WebApp.Services
 
         public async Task<LoginResult> Login(LoginModel loginModel)
         {
-            try
-            {
-                var result = await _httpClient.PostJsonAsync<LoginResult>($"{BaseApiUrl}/token", loginModel);
+            var result = await _httpClient.PostJsonAsync<LoginResult>($"{BaseApiUrl}/token", loginModel);
 
-                if (result.Successful)
-                {
-                    await _localStorage.SetItemAsync("authToken", result.Token);
-                    ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(
-                        result.Token);
-                    _httpClient.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue("bearer", result.Token);
-                }
-
-                return result;
-            }
-            catch (Exception e)
+            if (result.Successful)
             {
-                return new LoginResult { Error = e.Message, Successful = false };
+                await _localStorage.SetItemAsync("authToken", result.Token);
+                ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(
+                    result.Token);
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("bearer", result.Token);
             }
+
+            return result;
         }
 
         public async Task Logout()

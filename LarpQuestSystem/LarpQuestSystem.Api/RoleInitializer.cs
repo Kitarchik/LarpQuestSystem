@@ -21,6 +21,10 @@ namespace LarpQuestSystem.Api
             {
                 await roleManager.CreateAsync(new IdentityRole("User"));
             }
+            if (await roleManager.FindByNameAsync("ScriptWriter") == null)
+            {
+                await roleManager.CreateAsync(new IdentityRole("ScriptWriter"));
+            }
             if (await userManager.FindByNameAsync(adminEmail) == null)
             {
                 IdentityUser superUser = new IdentityUser { Email = adminEmail, UserName = adminEmail };

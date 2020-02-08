@@ -5,27 +5,29 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h1>Локации игры</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Локации игры</h1>
 
-@if (_locations == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <CascadingValue Value=@_locations>
-        <LocationsAddForm OnLocationsChange="ChangeLocations" />
-        <br/>
-        <br/>
-        <hr/>
-        <h2>Таблица локаций</h2>
-        <LocationsTable />
-    </CascadingValue>
-}
+    @if (_locations == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <CascadingValue Value=@_locations>
+            <LocationsAddForm OnLocationsChange="ChangeLocations" />
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица локаций</h2>
+            <LocationsTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 
 @code {
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     private List<Location> _locations { get; set; }
     private string _message = "Загрузка...";

@@ -6,47 +6,49 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>Редактировать цепочку квестов</h1>
+<AuthorizeView Policy="@Policies.IsAdmin">
+    <h1>Редактировать цепочку квестов</h1>
 
-@if (_chain == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <div class="form-group row">
-        <label for="txtChainName" class="col-sm-2 col-form-label">Название цепочки</label>
-        <div class="col-sm-10">
-            <input type="text" id="txtChainName" class="form-control" @bind="@_chain.Name" />
-        </div>
-    </div>
-    <div class="form-group row">
-        <label for="txtChainDescription" class="col-sm-2 col-form-label">Описание</label>
-        <div class="col-sm-10">
-            <textarea class="form-control" id="txtChainDescription" rows="5" @bind="@_chain.Description"></textarea>
-        </div>
-    </div>
-    @for (int i = 0; i < _selectedQuests.Count; i++)
+    @if (_chain == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
     {
         <div class="form-group row">
+            <label for="txtChainName" class="col-sm-2 col-form-label">Название цепочки</label>
             <div class="col-sm-10">
-                <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+                <input type="text" id="txtChainName" class="form-control" @bind="@_chain.Name" />
             </div>
         </div>
+        <div class="form-group row">
+            <label for="txtChainDescription" class="col-sm-2 col-form-label">Описание</label>
+            <div class="col-sm-10">
+                <textarea class="form-control" id="txtChainDescription" rows="5" @bind="@_chain.Description"></textarea>
+            </div>
+        </div>
+        @for (int i = 0; i < _selectedQuests.Count; i++)
+        {
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+                </div>
+            </div>
+        }
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Следующий шаг</label>
+            <FilterItems Items="@_quests.Select(x=>x.Name).ToList()" OnItemSelect="@SelectQuest" />
+        </div>
+        <div class="form-group row">
+            <button class="btn btn-primary" @onclick="@IncreaseSteps">Добавить шаг</button>
+            <button class="btn btn-primary" @onclick="@DecreaseSteps">Убрать шаг</button>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+        </div>
     }
-    <div class="form-group row">
-        <label class="col-sm-2 col-form-label">Следующий шаг</label>
-        <FilterItems Items="@_quests.Select(x=>x.Name).ToList()" OnItemSelect="@SelectQuest" />
-    </div>
-    <div class="form-group row">
-        <button class="btn btn-primary" @onclick="@IncreaseSteps">Добавить шаг</button>
-        <button class="btn btn-primary" @onclick="@DecreaseSteps">Убрать шаг</button>
-    </div>
-    <div class="form-group">
-        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
-        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
-    </div>
-}
+</AuthorizeView>
 
 @code {
     private string _message = "Загрузка...";

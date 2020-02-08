@@ -8,40 +8,41 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Локальное хранение данных</h1>
 
-<h1>Локальное хранение данных</h1>
-
-@if (Quests == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <button class="btn btn-primary" @onclick="@DownloadArtisticTexts">Скачать художественные тексты для квестов</button>
-    <button class="btn btn-primary" @onclick="@DownloadTechnicalTexts">Скачать технические тексты для квестов</button>
-    <button class="btn btn-primary" @onclick="@DownloadTechnicalItemTexts">Скачать технические тексты для предметов</button>
-    @if (NotDownloadedArtistic.Any())
+    @if (Quests == null)
     {
-        <CascadingValue Value=@NotDownloadedArtistic>
-            <h2>Нескачанные художественные тексты</h2>
-            <QuestsShortTable />
-        </CascadingValue>
+        <p><em>@_message</em></p>
     }
-    @if (NotDownloadedTechnical.Any())
+    else
     {
-        <CascadingValue Value=@NotDownloadedTechnical>
-            <h2>Нескачанные технические тексты</h2>
-            <QuestsShortTable />
-        </CascadingValue>
+        <button class="btn btn-primary" @onclick="@DownloadArtisticTexts">Скачать художественные тексты для квестов</button>
+        <button class="btn btn-primary" @onclick="@DownloadTechnicalTexts">Скачать технические тексты для квестов</button>
+        <button class="btn btn-primary" @onclick="@DownloadTechnicalItemTexts">Скачать технические тексты для предметов</button>
+        @if (NotDownloadedArtistic.Any())
+        {
+            <CascadingValue Value=@NotDownloadedArtistic>
+                <h2>Нескачанные художественные тексты</h2>
+                <QuestsShortTable />
+            </CascadingValue>
+        }
+        @if (NotDownloadedTechnical.Any())
+        {
+            <CascadingValue Value=@NotDownloadedTechnical>
+                <h2>Нескачанные технические тексты</h2>
+                <QuestsShortTable />
+            </CascadingValue>
+        }
+        @if (NotDownloadedItemTechnical.Any())
+        {
+            <CascadingValue Value=@NotDownloadedItemTechnical>
+                <h2>Нескачанные технические тексты для предметов</h2>
+                <ItemQuestTable />
+            </CascadingValue>
+        }
     }
-    @if (NotDownloadedItemTechnical.Any())
-    {
-        <CascadingValue Value=@NotDownloadedItemTechnical>
-            <h2>Нескачанные технические тексты для предметов</h2>
-            <ItemQuestTable />
-        </CascadingValue>
-    }
-}
+</AuthorizeView>
 
 @code {
     private List<Quest> Quests { get; set; }

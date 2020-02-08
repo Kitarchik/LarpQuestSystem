@@ -5,23 +5,25 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h1>Список Игроков</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Список Игроков</h1>
 
-@if (_players == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <CascadingValue Value=@_players>
-        <PlayersAddForm OnPlayersChange="@ChangePlayers" />
-        <br />
-        <br />
-        <hr />
-        <h2>Таблица игроков</h2>
-        <PlayersTable />
-    </CascadingValue>
-}
+    @if (_players == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <CascadingValue Value=@_players>
+            <PlayersAddForm OnPlayersChange="@ChangePlayers" />
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица игроков</h2>
+            <PlayersTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 
 @code {
     private List<Player> _players { get; set; }

@@ -1,0 +1,95 @@
+﻿@page "/users/{UserEmail}"
+@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.WebApp.Components.Utils
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+
+<AuthorizeView Policy="@Policies.IsSuperUser">
+    <h1>Пользователь</h1>
+
+    @if (_user == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <p>Email: @_user.Email</p>
+        <h2>Роли</h2>
+        <div class="card-body">
+            <div class="form-group">
+                <input type="checkbox" id="admin" @bind="@AdminRole">
+                <label for="admin">Администратор</label>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="scriptWriter" @bind="@ScriptWriterRole">
+                <label for="scriptWriter">Сценарист</label>
+            </div>
+        </div>
+        <div style="margin-bottom: 10px">
+            <button class="btn btn-primary" @onclick="@SaveRoles">Сохранить права</button>
+            <button class="btn btn-primary" @onclick="@DeleteUser">Удалить пользователя</button>
+        </div>
+    }
+</AuthorizeView>
+
+@code {
+    private string _message = "Загрузка...";
+    private UserInfo _user;
+    [Parameter]
+    public string UserEmail { get; set; }
+    private bool AdminRole { get; set; }
+    private bool ScriptWriterRole { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await Http.GetJsonAsync<UserInfo>($"{BaseApiUrl}/users/{UserEmail}");
+        AdminRole = _user.Roles.Contains(Roles.Admin);
+        ScriptWriterRole = _user.Roles.Contains(Roles.ScriptWriter);
+    }
+
+    private async Task DeleteUser()
+    {
+        var response = await Http.DeleteAsync($"{BaseApiUrl}/users/{UserEmail}");
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/users");
+        }
+        else
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Что-то пошло не так.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+    }
+
+    private async Task SaveRoles()
+    {
+        var roles = new List<string> { Roles.User };
+        if (AdminRole)
+        {
+            roles.Add(Roles.Admin);
+        }
+        if (ScriptWriterRole)
+        {
+            roles.Add(Roles.ScriptWriter);
+        }
+        if (_user.Roles.Contains(Roles.SuperUser))
+        {
+            roles.Add(Roles.SuperUser);
+        }
+        var newUser = new UserInfo()
+        {
+            Email = UserEmail,
+            Roles = roles,
+        };
+        await Http.PutJsonAsync<UserInfo>($"{BaseApiUrl}/users", newUser);
+        NavigationManager.NavigateTo("/users");
+    }
+
+}

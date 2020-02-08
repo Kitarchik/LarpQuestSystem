@@ -5,23 +5,25 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h1>Список НПС</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Список НПС</h1>
 
-@if (_npcs == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <CascadingValue Value=@_npcs>
-        <NpcsAddForm OnNpcsChange="ChangeNpcs" />
-        <br />
-        <br />
-        <hr />
-        <h2>Таблица НПС</h2>
-        <NpcsShortTable />
-    </CascadingValue>
-}
+    @if (_npcs == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <CascadingValue Value=@_npcs>
+            <NpcsAddForm OnNpcsChange="ChangeNpcs" />
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица НПС</h2>
+            <NpcsShortTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 
 @code {
     private List<Npc> _npcs { get; set; }

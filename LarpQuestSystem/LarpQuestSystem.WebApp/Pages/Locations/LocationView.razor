@@ -8,47 +8,51 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>Локация</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Локация</h1>
 
-@if (_location == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <p><em>Название: @_location.Location.Name</em></p>
-    <p><em>Описание: @_location.Location.Description</em></p>
-    <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="@EditLocation">Редактировать локацию</button>
-        <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
-    </div>
-    if (_location.Npcs.Any())
+    @if (_location == null)
     {
-        <br />
-        <br />
-        <hr />
-        <h2>Список НПС локации <button class="btn btn-primary" @onclick="@ToggleNpcsTable">@(!_hideNpcsTable ? "Скрыть" : "Показать")</button> </h2>
-        @if (!_hideNpcsTable)
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <p><em>Название: @_location.Location.Name</em></p>
+        <p><em>Описание: @_location.Location.Description</em></p>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <div style="margin-bottom: 10px">
+                <button class="btn btn-primary" @onclick="@EditLocation">Редактировать локацию</button>
+                <button class="btn btn-primary" @onclick="@DeleteLocation">Удалить локацию</button>
+            </div>
+        </AuthorizeView>
+        if (_location.Npcs.Any())
         {
-            <CascadingValue Value=@_npcs>
-                <NpcsShortTable />
-            </CascadingValue>
+            <br />
+            <br />
+            <hr />
+            <h2>Список НПС локации <button class="btn btn-primary" @onclick="@ToggleNpcsTable">@(!_hideNpcsTable ? "Скрыть" : "Показать")</button> </h2>
+            @if (!_hideNpcsTable)
+            {
+                <CascadingValue Value=@_npcs>
+                    <NpcsShortTable />
+                </CascadingValue>
+            }
+        }
+        if (_location.Players.Any())
+        {
+            <br />
+            <br />
+            <hr />
+            <h2>Список игроков локации <button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button> </h2>
+            @if (!_hideNpcsTable)
+            {
+                <CascadingValue Value=@_players>
+                    <PlayersTable />
+                </CascadingValue>
+            }
         }
     }
-    if (_location.Players.Any())
-    {
-        <br />
-        <br />
-        <hr />
-        <h2>Список игроков локации <button class="btn btn-primary" @onclick="@TogglePlayersTable">@(!_hidePlayersTable ? "Скрыть" : "Показать")</button> </h2>
-        @if (!_hideNpcsTable)
-        {
-            <CascadingValue Value=@_players>
-                <PlayersTable />
-            </CascadingValue>
-        }
-    }
-}
+</AuthorizeView>
 
 @code {
     private string _message = "Загрузка...";

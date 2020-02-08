@@ -6,53 +6,55 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>Редактировать квестовый предмет</h1>
+<AuthorizeView Policy="@Policies.IsAdmin">
+    <h1>Редактировать квестовый предмет</h1>
 
-@if (_itemView == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <EditForm Model="@_item" OnValidSubmit="@Submit">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+    @if (_itemView == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <EditForm Model="@_item" OnValidSubmit="@Submit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <div class="form-group row">
-            <label for="txtItemName" class="col-sm-2 col-form-label">Имя НПС</label>
-            <div class="col-sm-10">
-                <InputText id="txtItemName" class="form-control" @bind-Value="@_item.Name"></InputText>
-                <ValidationMessage For="@(() => _item.Name)"></ValidationMessage>
+            <div class="form-group row">
+                <label for="txtItemName" class="col-sm-2 col-form-label">Имя НПС</label>
+                <div class="col-sm-10">
+                    <InputText id="txtItemName" class="form-control" @bind-Value="@_item.Name"></InputText>
+                    <ValidationMessage For="@(() => _item.Name)"></ValidationMessage>
+                </div>
             </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtItemDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtItemDescription" rows="5" @bind="@_item.Description"></textarea>
+            <div class="form-group row">
+                <label for="txtItemDescription" class="col-sm-2 col-form-label">Описание</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="txtItemDescription" rows="5" @bind="@_item.Description"></textarea>
+                </div>
             </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtAmountReady" class="col-sm-2 col-form-label">Количество готовых предметов</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtAmountReady" class="form-control" @bind="@_amountReadyString" />
+            <div class="form-group row">
+                <label for="txtAmountReady" class="col-sm-2 col-form-label">Количество готовых предметов</label>
+                <div class="col-sm-10">
+                    <input type="text" id="txtAmountReady" class="form-control" @bind="@_amountReadyString" />
+                </div>
             </div>
-        </div>
-        <div class="form-group row">
-            <label for="itemType" class="col-sm-2 col-form-label">Тип предмета</label>
-            <div class="col-sm-10">
-                <select id="itemType" @bind="@_item.ItemType">
-                    @foreach (int itemType in Enum.GetValues(typeof(ItemType)))
-                    {
-                        <option value="@itemType">@GetStringItemTypeValue(itemType)</option>
-                    }
-                </select>
+            <div class="form-group row">
+                <label for="itemType" class="col-sm-2 col-form-label">Тип предмета</label>
+                <div class="col-sm-10">
+                    <select id="itemType" @bind="@_item.ItemType">
+                        @foreach (int itemType in Enum.GetValues(typeof(ItemType)))
+                        {
+                            <option value="@itemType">@GetStringItemTypeValue(itemType)</option>
+                        }
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
-        </div>
-    </EditForm>
-}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+            </div>
+        </EditForm>
+    }
+</AuthorizeView>
 
 @code {
     private string _message = "Загрузка...";

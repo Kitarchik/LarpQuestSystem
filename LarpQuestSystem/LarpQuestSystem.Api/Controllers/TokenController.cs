@@ -8,10 +8,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using LarpQuestSystem.Data.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace LarpQuestSystem.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TokenController : ControllerBase
@@ -23,12 +25,13 @@ namespace LarpQuestSystem.Api.Controllers
             _signInManager = signInManager;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<LoginResult>> Create(LoginModel login)
         {
             var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, false, false);
 
-            if (!result.Succeeded) return BadRequest(new LoginResult { Successful = false, Error = "Username and password are invalid." });
+            if (!result.Succeeded) return Ok(new LoginResult { Successful = false, Error = "Username and password are invalid." });
 
             var user = await _signInManager.UserManager.FindByEmailAsync(login.Email);
             var roles = await _signInManager.UserManager.GetRolesAsync(user);

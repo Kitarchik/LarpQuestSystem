@@ -1,0 +1,68 @@
+﻿
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <div class="col-sm">
+        <input type="text" id="filterByEmail" @bind-value="@EmailFilter" @bind-value:event="oninput" placeholder="Email" />
+    </div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in _filteredUsers)
+        {
+            <tr>
+                <td>@user</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => NavigateToUserEditView(user))"> <span class="oi oi-pencil" aria-hidden="true"></span>Редактировать права</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<string> _filteredUsers;
+    private string _emailFilter = string.Empty;
+
+    [CascadingParameter]
+    private List<string> Users { get; set; }
+
+    public string EmailFilter
+    {
+        get => _emailFilter;
+        set
+        {
+            _emailFilter = value;
+            FilterQuests();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredUsers = Users;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterQuests()
+    {
+        _filteredUsers = Users
+            .Where(x => x.Contains(_emailFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToUserEditView(string userEmail)
+    {
+        NavigationManager.NavigateTo($"/users/{userEmail}");
+    }
+
+}

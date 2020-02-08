@@ -70,6 +70,7 @@ namespace LarpQuestSystem.Api
                 config.AddPolicy(Policies.IsAdmin, Policies.IsAdminPolicy());
                 config.AddPolicy(Policies.IsUser, Policies.IsUserPolicy());
                 config.AddPolicy(Policies.IsSuperUser, Policies.IsSuperUserPolicy());
+                config.AddPolicy(Policies.IsScriptWriter, Policies.IsScriptWriterPolicy());
             });
         }
 

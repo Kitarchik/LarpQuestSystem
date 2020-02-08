@@ -7,25 +7,33 @@ namespace LarpQuestSystem.Data.Model
         public const string IsAdmin = "IsAdmin";
         public const string IsUser = "IsUser";
         public const string IsSuperUser = "IsSuperUser";
+        public const string IsScriptWriter = "IsScriptWriter";
 
         public static AuthorizationPolicy IsAdminPolicy()
         {
             return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
-                .RequireRole("Admin", "SuperUser")
+                .RequireRole(Roles.Admin, Roles.SuperUser)
                 .Build();
         }
 
         public static AuthorizationPolicy IsUserPolicy()
         {
             return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
-                .RequireRole("User", "Admin", "SuperUser")
+                .RequireRole(Roles.User, Roles.ScriptWriter, Roles.Admin, Roles.SuperUser)
+                .Build();
+        }
+
+        public static AuthorizationPolicy IsScriptWriterPolicy()
+        {
+            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
+                .RequireRole(Roles.ScriptWriter, Roles.Admin, Roles.SuperUser)
                 .Build();
         }
 
         public static AuthorizationPolicy IsSuperUserPolicy()
         {
             return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
-                .RequireRole("SuperUser")
+                .RequireRole(Roles.SuperUser)
                 .Build();
         }
     }

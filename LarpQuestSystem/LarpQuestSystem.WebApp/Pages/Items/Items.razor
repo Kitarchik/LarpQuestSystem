@@ -5,23 +5,25 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<h1>Квестовые предметы</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Квестовые предметы</h1>
 
-@if (_items == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <CascadingValue Value=@_items>
-        <ItemsAddForm OnItemsChange="@ChangeItems" />
-        <br />
-        <br />
-        <hr />
-        <h2>Таблица квестовых предметов</h2>
-        <ItemsTable />
-    </CascadingValue>
-}
+    @if (_items == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <CascadingValue Value=@_items>
+            <ItemsAddForm OnItemsChange="@ChangeItems" />
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица квестовых предметов</h2>
+            <ItemsTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 
 @code {
     private List<Item> _items { get; set; }

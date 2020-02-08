@@ -7,30 +7,34 @@
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<h1>Квестовый предмет</h1>
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Квестовый предмет</h1>
 
-@if (_item == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <p><em>Название: @_item.Item.Name</em></p>
-    <p><em>Описание: @_item.Item.Description</em></p>
-    <p><em>Количество готовых предметов: @_item.Item.AmountReady</em></p>
-    <p><em>Тип предмета: @GetItemType(_item.Item.ItemType)</em></p>
-    <div style="margin-bottom: 10px">
-        <button class="btn btn-primary" @onclick="@EditItem">Редактировать предмет</button>
-        <button class="btn btn-primary" @onclick="@DeleteItem">Удалить предмет</button>
-    </div>
-    <CascadingValue Value=@_item.QuestItems.ToList()>
-        <br />
-        <br />
-        <hr />
-        <h2>Таблица квестов, в которых участвует предмет</h2>
-        <ItemQuestTable />
-    </CascadingValue>
-}
+    @if (_item == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <p><em>Название: @_item.Item.Name</em></p>
+        <p><em>Описание: @_item.Item.Description</em></p>
+        <p><em>Количество готовых предметов: @_item.Item.AmountReady</em></p>
+        <p><em>Тип предмета: @GetItemType(_item.Item.ItemType)</em></p>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <div style="margin-bottom: 10px">
+                <button class="btn btn-primary" @onclick="@EditItem">Редактировать предмет</button>
+                <button class="btn btn-primary" @onclick="@DeleteItem">Удалить предмет</button>
+            </div>
+        </AuthorizeView>
+        <CascadingValue Value=@_item.QuestItems.ToList()>
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица квестов, в которых участвует предмет</h2>
+            <ItemQuestTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 
 @code
 {

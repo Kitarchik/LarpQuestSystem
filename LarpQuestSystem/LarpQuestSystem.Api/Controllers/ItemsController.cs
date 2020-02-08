@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers
 {
+    [Authorize(Policy = Policies.IsScriptWriter)]
     [Route("api/[controller]")]
     [ApiController]
     public class ItemsController : ControllerBase
@@ -73,6 +75,7 @@ namespace LarpQuestSystem.Api.Controllers
             return new ObjectResult(itemInfo);
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpPost]
         public async Task<ActionResult<Item>> Post(Item item)
         {
@@ -91,6 +94,7 @@ namespace LarpQuestSystem.Api.Controllers
             return Ok(item);
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpPut]
         public async Task<ActionResult<Item>> Put(Item item)
         {
@@ -157,6 +161,7 @@ namespace LarpQuestSystem.Api.Controllers
             }
         }
 
+        [Authorize(Policy = Policies.IsAdmin)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Item>> Delete(int id)
         {

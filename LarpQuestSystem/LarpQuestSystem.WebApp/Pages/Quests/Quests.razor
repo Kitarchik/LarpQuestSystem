@@ -5,30 +5,30 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
+<AuthorizeView Policy="@Policies.IsScriptWriter">
+    <h1>Квесты</h1>
 
-<h1>Квесты</h1>
-
-@if (_quests == null)
-{
-    <p><em>@_message</em></p>
-}
-else
-{
-    <CascadingValue Value=@_quests>
-        <QuestsAddForm OnQuestsChange="ChangeQuests" />
-        <br/>
-        <br/>
-        <hr/>
-        <h2>Таблица квестов</h2>
-        <QuestsShortTable />
-    </CascadingValue>
-}
-
+    @if (_quests == null)
+    {
+        <p><em>@_message</em></p>
+    }
+    else
+    {
+        <CascadingValue Value=@_quests>
+            <QuestsAddForm OnQuestsChange="ChangeQuests" />
+            <br />
+            <br />
+            <hr />
+            <h2>Таблица квестов</h2>
+            <QuestsShortTable />
+        </CascadingValue>
+    }
+</AuthorizeView>
 @code {
     private List<Quest> _quests { get; set; }
     private string _message = "Загрузка...";
 
-    [CascadingParameter (Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

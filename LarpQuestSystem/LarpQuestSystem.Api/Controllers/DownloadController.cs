@@ -7,9 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LarpQuestSystem.Data.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers
 {
+    [Authorize(Policy = Policies.IsScriptWriter)]
     [Route("api/[controller]")]
     [ApiController]
     public class DownloadController : ControllerBase
