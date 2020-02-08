@@ -4,7 +4,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager UriHelper
 
-<h1>Register</h1>
+<h1>Регистрация</h1>
 
 @if (ShowErrors)
 {
@@ -18,23 +18,23 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Please enter your details</h5>
+        <h5 class="card-title">Введите свои данные</h5>
         <EditForm Model="@RegisterModel" OnValidSubmit="@HandleRegistration">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <div class="form-group">
-                <label for="email">Email address</label>
+                <label for="email">Email</label>
                 <InputText Id="email" Class="form-control" @bind-Value="@RegisterModel.Email" />
                 <ValidationMessage For="@(() => RegisterModel.Email)" />
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Пароль</label>
                 <InputText type="password" Id="password" Class="form-control" @bind-Value="@RegisterModel.Password" />
                 <ValidationMessage For="@(() => RegisterModel.Password)" />
             </div>
             <div class="form-group">
-                <label for="password">Confirm Password</label>
+                <label for="password">Подтверждение пароля</label>
                 <InputText type="password" Id="password" Class="form-control" @bind-Value="@RegisterModel.ConfirmPassword" />
                 <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
             </div>
