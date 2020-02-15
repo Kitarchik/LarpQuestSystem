@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LarpQuestSystem.Data.Model.QuestSystem;
+using LarpQuestSystem.Data.Model.Security;
 using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers
@@ -44,7 +46,8 @@ namespace LarpQuestSystem.Api.Controllers
                     Id = player.Id,
                     Name = player.Name,
                     Description = player.Description,
-                    LocationId = player.LocationId
+                    LocationId = player.LocationId,
+                    NumberOfPayedAccounts = player.NumberOfPayedAccounts
                 },
                 Location = new Location
                 {

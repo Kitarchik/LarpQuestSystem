@@ -1,149 +1,152 @@
 ﻿@page "/quests/edit/{QuestId:int}"
+@attribute [Authorize(Policy = Policies.IsAdmin)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.Data.Model.Utilities
 @using LarpQuestSystem.WebApp.Components.Utils
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<AuthorizeView Policy="@Policies.IsAdmin">
-    <h1>Редактировать квест</h1>
 
-    @if (_quest == null)
+<h1>Редактировать квест</h1>
+
+@if (_quest == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtQuestName" class="form-control" @bind="@_quest.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtQuestDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtQuestDescription" rows="5" @bind="@_quest.Description"></textarea>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtArtisticTextLink" class="form-control" @bind="@_quest.ArtisticTextLink" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtTechnicalTextLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtTechnicalTextLink" class="form-control" @bind="@_quest.TechnicalDescriptionLink">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество копий в печать</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtAmountToPrint" class="form-control" @bind="@_amountToPrintString" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">НПС выдающий квест: </label>
+        <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestGiver.Name" OnItemSelect="@SelectQuestGiver" />
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">НПС принимающий квест: </label>
+        <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestEnding.Name" OnItemSelect="@SelectQuestEnding" />
+    </div>
+    <div class="form-group row">
+        <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
+        <div class="col-sm-10">
+            <select id="questComplexity" @bind="@_quest.Complexity">
+                @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
+                {
+                    <option value="@complexity">@GetStringComplexityValue(complexity)</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
+        <div class="col-sm-10">
+            <select id="questGrade" @bind="@_quest.Grade">
+                @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
+                {
+                    <option value="@grade">@GetStringGradeValue(grade)</option>
+                }
+            </select>
+        </div>
+    </div>
+    @for (int i = 0; i < _selectedPlayers.Count; i++)
     {
-        <p><em>@_message</em></p>
+        <div class="form-group row">
+            <p><em>Игрок/Команда: @_selectedPlayers[i].Name</em></p>
+        </div>
     }
-    else
+    <div class="form-group row">
+        <label for="txtPlayerFilter" class="col-sm-2 col-form-label">Фильтр</label>
+        <FilterItems Items="@_players.Select(x=>x.Name).ToList()" OnItemSelect="@SelectPlayer" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@AddPlayer">Добавить игрока</button>
+        <button class="btn btn-primary" @onclick="@DeletePlayer">Убрать игрока</button>
+    </div>
+    @if (_selectedItems != null)
     {
-        <div class="form-group row">
-            <label for="txtQuestName" class="col-sm-2 col-form-label">Название квеста</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtQuestName" class="form-control" @bind="@_quest.Name" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtQuestDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtQuestDescription" rows="5" @bind="@_quest.Description"></textarea>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtArtisticTextLink" class="col-sm-2 col-form-label">Ссылка на художественный текст</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtArtisticTextLink" class="form-control" @bind="@_quest.ArtisticTextLink" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtTechnicalTextLink" class="col-sm-2 col-form-label">Ссылка на технический документ</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtTechnicalTextLink" class="form-control" @bind="@_quest.TechnicalDescriptionLink">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество копий в печать</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtAmountToPrint" class="form-control" @bind="@_amountToPrintString" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2 col-form-label">НПС выдающий квест: </label>
-            <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestGiver.Name" OnItemSelect="@SelectQuestGiver" />
-        </div>
-        <div class="form-group row">
-            <label class="col-sm-2 col-form-label">НПС принимающий квест: </label>
-            <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" SelectedItem="@_questView.QuestEnding.Name" OnItemSelect="@SelectQuestEnding" />
-        </div>
-        <div class="form-group row">
-            <label for="questComplexity" class="col-sm-2 col-form-label">Сложность квеста</label>
-            <div class="col-sm-10">
-                <select id="questComplexity" @bind="@_quest.Complexity">
-                    @foreach (int complexity in Enum.GetValues(typeof(QuestComplexity)))
-                    {
-                        <option value="@complexity">@GetStringComplexityValue(complexity)</option>
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="questGrade" class="col-sm-2 col-form-label">Градация квеста</label>
-            <div class="col-sm-10">
-                <select id="questGrade" @bind="@_quest.Grade">
-                    @foreach (int grade in Enum.GetValues(typeof(QuestGrade)))
-                    {
-                        <option value="@grade">@GetStringGradeValue(grade)</option>
-                    }
-                </select>
-            </div>
-        </div>
-        @for (int i = 0; i < _selectedPlayers.Count; i++)
+        @for (int i = 0; i < _selectedItems.Count; i++)
         {
             <div class="form-group row">
-                <p><em>Игрок/Команда: @_selectedPlayers[i].Name</em></p>
+                <div class="col-sm-10">
+                    <p><em>Предмет: @_selectedItems[i].Item.Name  Количество: @_selectedItems[i].AmountNeeded  НПС, хранящий предмет: @_selectedItems[i].StartingNpc.Name</em></p>
+                </div>
             </div>
         }
-        <div class="form-group row">
-            <label for="txtPlayerFilter" class="col-sm-2 col-form-label">Фильтр</label>
-            <FilterItems Items="@_players.Select(x=>x.Name).ToList()" OnItemSelect="@SelectPlayer" />
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="@AddPlayer">Добавить игрока</button>
-            <button class="btn btn-primary" @onclick="@DeletePlayer">Убрать игрока</button>
-        </div>
-        @if (_selectedItems != null)
-        {
-            @for (int i = 0; i < _selectedItems.Count; i++)
-            {
-                <div class="form-group row">
-                    <div class="col-sm-10">
-                        <p><em>Предмет: @_selectedItems[i].Item.Name  Количество: @_selectedItems[i].AmountNeeded  НПС, хранящий предмет: @_selectedItems[i].StartingNpc.Name</em></p>
-                    </div>
-                </div>
-            }
-        }
-        <div class="form-group row">
-            <div class="row col-sm">
-                <div class="col-sm my-auto">
-                    <label class="col-sm-2 col-form-label">Выберите предмет</label>
-                </div>
-                <div class="row col-sm">
-                    <FilterItems Items="@_items.Select(x=>x.Name).ToList()" OnItemSelect="@SelectItem" />
-                </div>
-            </div>
-            <div class="row col-sm">
-                <div class="col-sm my-auto">
-                    <label class="col-sm-2 col-form-label">Выберите НПС</label>
-                </div>
-                <div class="row col-sm">
-                    <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" OnItemSelect="@SelectNpcForItem" />
-                </div>
-            </div>
-            <div class="row col-sm">
-                <div class="col-sm my-auto">
-                    <label for="txtItemAmount" class="col-sm-2 col-form-label">Требуемое количество предметов: </label>
-                </div>
-                <div class="row col-sm">
-                    <input type="text" id="txtItemAmount" @bind="@_itemAmountNeeded" />
-                </div>
-            </div>
-            <div class="row col-sm">
-                <div class="col-sm my-auto">
-                    <label for="txtTechnicalDocument" class="col-sm-2 col-form-label">Технический документ для НПС: </label>
-                </div>
-                <div class="row col-sm">
-                    <input type="text" id="txtTechnicalDocument" @bind="@_itemTechnicalDocument" />
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="@AddItem">Добавить предмет</button>
-            <button class="btn btn-primary" @onclick="@DeleteItem">Убрать предмет</button>
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
-            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
-        </div>
     }
-</AuthorizeView>
+    <div class="form-group row">
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label class="col-sm-2 col-form-label">Выберите предмет</label>
+            </div>
+            <div class="row col-sm">
+                <FilterItems Items="@_items.Select(x=>x.Name).ToList()" OnItemSelect="@SelectItem" />
+            </div>
+        </div>
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label class="col-sm-2 col-form-label">Выберите НПС</label>
+            </div>
+            <div class="row col-sm">
+                <FilterItems Items="@_npcs.Select(x=>x.Name).ToList()" OnItemSelect="@SelectNpcForItem" />
+            </div>
+        </div>
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label for="txtItemAmount" class="col-sm-2 col-form-label">Требуемое количество предметов: </label>
+            </div>
+            <div class="row col-sm">
+                <input type="text" id="txtItemAmount" @bind="@_itemAmountNeeded" />
+            </div>
+        </div>
+        <div class="row col-sm">
+            <div class="col-sm my-auto">
+                <label for="txtTechnicalDocument" class="col-sm-2 col-form-label">Технический документ для НПС: </label>
+            </div>
+            <div class="row col-sm">
+                <input type="text" id="txtTechnicalDocument" @bind="@_itemTechnicalDocument" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@AddItem">Добавить предмет</button>
+        <button class="btn btn-primary" @onclick="@DeleteItem">Убрать предмет</button>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
+}
 
 @code {
     private string _message = "Загрузка...";

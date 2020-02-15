@@ -1,29 +1,32 @@
 ﻿@page "/npcs"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Npcs
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Список НПС</h1>
+<h1>Список НПС</h1>
 
-    @if (_npcs == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <CascadingValue Value=@_npcs>
+@if (_npcs == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_npcs>
+        <AuthorizeView Policy="@Policies.IsAdmin">
             <NpcsAddForm OnNpcsChange="ChangeNpcs" />
             <br />
             <br />
             <hr />
-            <h2>Таблица НПС</h2>
-            <NpcsShortTable />
-        </CascadingValue>
-    }
-</AuthorizeView>
+        </AuthorizeView>
+        <h2>Таблица НПС</h2>
+        <NpcsShortTable />
+    </CascadingValue>
+}
 
 @code {
     private List<Npc> _npcs { get; set; }

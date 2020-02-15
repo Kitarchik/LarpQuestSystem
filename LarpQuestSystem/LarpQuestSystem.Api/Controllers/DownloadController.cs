@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LarpQuestSystem.Data.Model;
+using LarpQuestSystem.Data.Model.Security;
 using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers

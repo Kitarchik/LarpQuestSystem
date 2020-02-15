@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using Blazored.Modal;
 using LarpQuestSystem.Data.Model;
+using LarpQuestSystem.Data.Model.Security;
 using LarpQuestSystem.WebApp.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Builder;

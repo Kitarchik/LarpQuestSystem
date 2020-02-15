@@ -1,42 +1,49 @@
 ﻿@page "/players/edit/{PlayerId:int}"
+@attribute [Authorize(Policy = Policies.IsAdmin)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Utils
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<AuthorizeView Policy="@Policies.IsAdmin">
-    <h1>Редактировать игрока</h1>
+<h1>Редактировать игрока</h1>
 
-    @if (_player == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <div class="form-group row">
-            <label for="txtPlayerName" class="col-sm-2 col-form-label">Имя игрока</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtPlayerName" class="form-control" @bind="@_player.Name" />
-            </div>
+@if (_player == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtPlayerName" class="col-sm-2 col-form-label">Имя игрока</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtPlayerName" class="form-control" @bind="@_player.Name" />
         </div>
-        <div class="form-group row">
-            <label for="txtPlayerDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtPlayerDescription" rows="5" @bind="@_player.Description"></textarea>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtPlayerDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtPlayerDescription" rows="5" @bind="@_player.Description"></textarea>
         </div>
-        <div class="form-group row">
-            <label class="col-sm-2 col-form-label">Выберите локацию: </label>
-            <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_playerView.Location.Name" OnItemSelect="@SelectLocation" />
+    </div>
+    <div class="form-group row">
+        <label for="txtAmountPayed" class="col-sm-2 col-form-label">Количество оплативших</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtAmountPayed" class="form-control" @bind="@_amountPayed" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
-            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
-        </div>
-    }
-</AuthorizeView>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Выберите локацию: </label>
+        <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_playerView.Location.Name" OnItemSelect="@SelectLocation" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
+}
 
 @code {
     private string _message = "Загрузка...";
@@ -44,6 +51,7 @@
     private Player _player;
     private List<Player> _players;
     private List<Location> _locations;
+    private string _amountPayed;
 
     [Parameter]
     public int PlayerId { get; set; }
@@ -56,6 +64,7 @@
         _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
         _playerView = await Http.GetJsonAsync<PlayerInfoView>($"{BaseApiUrl}/players/{PlayerId}");
         _player = _playerView.Player;
+        _amountPayed = _player.NumberOfPayedAccounts.ToString();
     }
 
     private void SelectLocation(string locationName)
@@ -86,8 +95,16 @@
 
             Modal.Show<Notification>("Notification", parameters);
         }
+        else if (!int.TryParse(_amountPayed, out int result) || result < 1)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Введите нормальное число оплативших. Будьте людьми то.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
         else
         {
+            _player.NumberOfPayedAccounts = int.Parse(_amountPayed);
             _player.Location = null;
             await Http.PutJsonAsync<Player>($"{BaseApiUrl}/players", _player);
             NavigationManager.NavigateTo($"/players/{PlayerId}");

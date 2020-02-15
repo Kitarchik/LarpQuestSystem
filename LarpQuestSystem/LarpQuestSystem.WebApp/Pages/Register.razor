@@ -1,5 +1,6 @@
 ﻿@page "/register"
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Services
 @inject IAuthService AuthService
 @inject NavigationManager UriHelper
@@ -38,7 +39,7 @@
                 <InputText type="password" Id="password" Class="form-control" @bind-Value="@RegisterModel.ConfirmPassword" />
                 <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
         </EditForm>
     </div>
 </div>

@@ -1,10 +1,16 @@
-﻿<AuthorizeView>
+﻿@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.Security
+<AuthorizeView Policy="@Policies.IsUser">
     <Authorized>
-        Привет, @context.User.Identity.Name!
-        <a href="LogOut">Выйти</a>
+        <div class="p-2">
+            Привет, @context.User.Identity.Name!
+            <a href="LogOut">Выйти</a>
+        </div>
     </Authorized>
     <NotAuthorized>
-        <a href="Register">Зарегистрироваться</a>
-        <a href="Login">Войти</a>
+        <div class="p-2">
+            <a href="Register">Зарегистрироваться</a>
+            <a href="Login">Войти</a>
+        </div>
     </NotAuthorized>
 </AuthorizeView>

@@ -1,4 +1,5 @@
 ﻿@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.Security
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">Система квестов</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -22,39 +23,49 @@
         </AuthorizeView>
         <AuthorizeView Policy="@Policies.IsScriptWriter">
             <li class="nav-item px-3">
-                <NavLink class="nav-link" href="quests">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Квесты
+                <NavLink class="nav-link" @onclick="() => expandScriptMenu = !expandScriptMenu">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Сюжет
                 </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="chains">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Цепочки квестов
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="npcs">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> НПС
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="locations">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Локации
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="players">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Игроки
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="items">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Квестовые предметы
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="downloads">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Локальное хранилище
-                </NavLink>
+                @if (expandScriptMenu)
+                {
+                    <ul class="nav flex-column">
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="downloads">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Скачать
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="quests">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Квесты
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="chains">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Цепочки квестов
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="npcs">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> НПС
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="locations">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Локации
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="players">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Игроки
+                            </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+                            <NavLink class="nav-link" href="items">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Предметы
+                            </NavLink>
+                        </li>
+                    </ul>
+                }
             </li>
         </AuthorizeView>
     </ul>
@@ -62,6 +73,7 @@
 
 @code {
     private bool collapseNavMenu = true;
+    private bool expandScriptMenu;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 

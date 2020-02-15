@@ -1,29 +1,33 @@
 ﻿@page "/quests"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Quests
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Квесты</h1>
+<h1>Квесты</h1>
 
-    @if (_quests == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <CascadingValue Value=@_quests>
+@if (_quests == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_quests>
+        <AuthorizeView Policy="@Policies.IsAdmin">
             <QuestsAddForm OnQuestsChange="ChangeQuests" />
             <br />
             <br />
             <hr />
-            <h2>Таблица квестов</h2>
-            <QuestsShortTable />
-        </CascadingValue>
-    }
-</AuthorizeView>
+        </AuthorizeView>
+        <h2>Таблица квестов</h2>
+        <QuestsShortTable />
+    </CascadingValue>
+}
+
 @code {
     private List<Quest> _quests { get; set; }
     private string _message = "Загрузка...";

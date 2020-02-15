@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using LarpQuestSystem.Data.Model;
+using LarpQuestSystem.Data.Model.Security;
 
 namespace LarpQuestSystem.WebApp.Services
 {

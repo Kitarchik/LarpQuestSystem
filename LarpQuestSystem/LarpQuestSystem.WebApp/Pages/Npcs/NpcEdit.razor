@@ -1,42 +1,44 @@
 ﻿@page "/npcs/edit/{NpcId:int}"
+@attribute [Authorize(Policy = Policies.IsAdmin)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Utils
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<AuthorizeView Policy="@Policies.IsAdmin">
-    <h1>Редактировать НПС</h1>
+<h1>Редактировать НПС</h1>
 
-    @if (_npc == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <div class="form-group row">
-            <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtNpcName" class="form-control" @bind="@_npc.Name" />
-            </div>
+@if (_npc == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtNpcName" class="col-sm-2 col-form-label">Имя НПС</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtNpcName" class="form-control" @bind="@_npc.Name" />
         </div>
-        <div class="form-group row">
-            <label for="txtNpcDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtNpcDescription" rows="5" @bind="@_npc.Description"></textarea>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtNpcDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtNpcDescription" rows="5" @bind="@_npc.Description"></textarea>
         </div>
-        <div class="form-group row">
-            <label class="col-sm-2 col-form-label">Фильтр локаций: </label>
-            <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_locations.First(x=>x.Id==_npc.LocationId).Name" OnItemSelect="@SelectLocation" />
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
-            <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
-        </div>
-    }
-</AuthorizeView>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Фильтр локаций: </label>
+        <FilterItems Items="@_locations.Select(x=>x.Name).ToList()" SelectedItem="@_locations.First(x=>x.Id==_npc.LocationId).Name" OnItemSelect="@SelectLocation" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
+}
+
 @code {
     private string _message = "Загрузка...";
     private Npc _npc;

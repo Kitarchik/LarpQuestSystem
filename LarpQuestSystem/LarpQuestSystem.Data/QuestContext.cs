@@ -1,4 +1,5 @@
 ﻿using LarpQuestSystem.Data.Model;
+using LarpQuestSystem.Data.Model.QuestSystem;
 using Microsoft.EntityFrameworkCore;
 
 namespace LarpQuestSystem.Data
@@ -17,7 +18,6 @@ namespace LarpQuestSystem.Data
 
         public QuestContext(DbContextOptions<QuestContext> options) : base(options)
         {
-            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

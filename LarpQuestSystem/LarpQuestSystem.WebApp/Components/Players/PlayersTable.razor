@@ -1,4 +1,5 @@
 ﻿@using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
 @inject NavigationManager NavigationManager
 
 <input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Имя игрока" />
@@ -7,6 +8,7 @@
         <tr>
             <th>Имя игрока</th>
             <th>Описание</th>
+            <th>Сданые взносы</th>
         </tr>
     </thead>
     <tbody>
@@ -15,6 +17,7 @@
             <tr @onclick="(() => NavigateToPlayerView(player.Id))">
                 <td>@player.Name</td>
                 <td>@player.Description</td>
+                <td>@player.NumberOfPayedAccounts</td>
             </tr>
         }
     </tbody>

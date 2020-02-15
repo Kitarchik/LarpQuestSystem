@@ -1,29 +1,33 @@
 ﻿@page "/chains"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Chains
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Цепочки квестов</h1>
 
-    @if (_chains == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <CascadingValue Value=@_chains>
+<h1>Цепочки квестов</h1>
+
+@if (_chains == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_chains>
+        <AuthorizeView Policy="@Policies.IsAdmin">
             <ChainsAddForm OnChainsChange="@ChangeChains" />
             <br />
             <br />
             <hr />
-            <h2>Таблица цепочек</h2>
-            <ChainsTable />
-        </CascadingValue>
-    }
-</AuthorizeView>
+        </AuthorizeView>
+        <h2>Таблица цепочек</h2>
+        <ChainsTable />
+    </CascadingValue>
+}
 
 @code {
     private List<Chain> _chains { get; set; }

@@ -1,51 +1,52 @@
 ﻿@page "/chains/{ChainId:int}"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Utils
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Цепочка квестов</h1>
+<h1>Цепочка квестов</h1>
 
-    @if (_chain == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <p><em>Название: @_chain.Chain.Name</em></p>
-        <p><em>Описание: @_chain.Chain.Description</em></p>
-        <AuthorizeView Policy="@Policies.IsAdmin">
-            <div style="margin-bottom: 10px">
-                <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
-                <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
-            </div>
-        </AuthorizeView>
-        <br />
-        <br />
-        <hr />
-        <h2>Шаги цепочки</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Название квеста</th>
-                    <th>Шаг</th>
+@if (_chain == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p><em>Название: @_chain.Chain.Name</em></p>
+    <p><em>Описание: @_chain.Chain.Description</em></p>
+    <AuthorizeView Policy="@Policies.IsAdmin">
+        <div style="margin-bottom: 10px">
+            <button class="btn btn-primary" @onclick="@EditChain">Редактировать цепочку</button>
+            <button class="btn btn-primary" @onclick="@DeleteChain">Удалить цепочку</button>
+        </div>
+    </AuthorizeView>
+    <br />
+    <br />
+    <hr />
+    <h2>Шаги цепочки</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Название квеста</th>
+                <th>Шаг</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var questChain in _chain.QuestChains.OrderBy(x => x.StepNumber))
+            {
+                <tr @onclick="(() => NavigateToQuestView(questChain.QuestId))">
+                    <td>@questChain.Quest.Name</td>
+                    <td>@questChain.StepNumber</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var questChain in _chain.QuestChains.OrderBy(x => x.StepNumber))
-                {
-                    <tr @onclick="(() => NavigateToQuestView(questChain.QuestId))">
-                        <td>@questChain.Quest.Name</td>
-                        <td>@questChain.StepNumber</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-</AuthorizeView>
+            }
+        </tbody>
+    </table>
+}
 
 @code
 {

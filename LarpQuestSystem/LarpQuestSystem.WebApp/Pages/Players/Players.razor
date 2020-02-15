@@ -1,29 +1,32 @@
 ﻿@page "/players"
+@attribute [Authorize(Policy = @Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Players
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Список Игроков</h1>
+<h1>Список Игроков</h1>
 
-    @if (_players == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <CascadingValue Value=@_players>
+@if (_players == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_players>
+        <AuthorizeView Policy="@Policies.IsAdmin">
             <PlayersAddForm OnPlayersChange="@ChangePlayers" />
             <br />
             <br />
             <hr />
-            <h2>Таблица игроков</h2>
-            <PlayersTable />
-        </CascadingValue>
-    }
-</AuthorizeView>
+        </AuthorizeView>
+        <h2>Таблица игроков</h2>
+        <PlayersTable />
+    </CascadingValue>
+}
 
 @code {
     private List<Player> _players { get; set; }

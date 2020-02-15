@@ -1,5 +1,7 @@
 ﻿@page "/users/{UserEmail}"
+@attribute [Authorize(Policy = Policies.IsSuperUser)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Utils
 
 @inject HttpClient Http
@@ -7,33 +9,31 @@
 @inject IModalService Modal
 
 
-<AuthorizeView Policy="@Policies.IsSuperUser">
-    <h1>Пользователь</h1>
+<h1>Пользователь</h1>
 
-    @if (_user == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <p>Email: @_user.Email</p>
-        <h2>Роли</h2>
-        <div class="card-body">
-            <div class="form-group">
-                <input type="checkbox" id="admin" @bind="@AdminRole">
-                <label for="admin">Администратор</label>
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="scriptWriter" @bind="@ScriptWriterRole">
-                <label for="scriptWriter">Сценарист</label>
-            </div>
+@if (_user == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p>Email: @_user.Email</p>
+    <h2>Роли</h2>
+    <div class="card-body">
+        <div class="form-group">
+            <input type="checkbox" id="admin" @bind="@AdminRole">
+            <label for="admin">Администратор</label>
         </div>
-        <div style="margin-bottom: 10px">
-            <button class="btn btn-primary" @onclick="@SaveRoles">Сохранить права</button>
-            <button class="btn btn-primary" @onclick="@DeleteUser">Удалить пользователя</button>
+        <div class="form-group">
+            <input type="checkbox" id="scriptWriter" @bind="@ScriptWriterRole">
+            <label for="scriptWriter">Сценарист</label>
         </div>
-    }
-</AuthorizeView>
+    </div>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@SaveRoles">Сохранить права</button>
+        <button class="btn btn-primary" @onclick="@DeleteUser">Удалить пользователя</button>
+    </div>
+}
 
 @code {
     private string _message = "Загрузка...";

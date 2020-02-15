@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text;
+using LarpQuestSystem.Data.Model.Security;
 
 namespace LarpQuestSystem.Api
 {
@@ -26,7 +27,7 @@ namespace LarpQuestSystem.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var connection = Configuration.GetConnectionString("QuestDatabase");
+            var connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<QuestContext>(options => options.UseSqlServer(connection));
             services.AddDbContext<LarpIdentityContext>(options => options.UseSqlServer(connection));
             services.AddControllers()
@@ -80,6 +81,17 @@ namespace LarpQuestSystem.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<LarpIdentityContext>();
+                context.Database.Migrate();
+            }
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<QuestContext>();
+                context.Database.Migrate();
             }
 
             app.UseRouting();

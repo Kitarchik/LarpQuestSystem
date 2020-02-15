@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
+using LarpQuestSystem.Data.Model.Security;
 using Microsoft.AspNetCore.Authorization;
 
 namespace LarpQuestSystem.Api.Controllers

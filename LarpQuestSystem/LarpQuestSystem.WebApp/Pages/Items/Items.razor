@@ -1,29 +1,33 @@
 ﻿@page "/items"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
 @using LarpQuestSystem.Data.Model
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
 @using LarpQuestSystem.WebApp.Components.Items
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
-<AuthorizeView Policy="@Policies.IsScriptWriter">
-    <h1>Квестовые предметы</h1>
 
-    @if (_items == null)
-    {
-        <p><em>@_message</em></p>
-    }
-    else
-    {
-        <CascadingValue Value=@_items>
+<h1>Квестовые предметы</h1>
+
+@if (_items == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_items>
+        <AuthorizeView Policy="@Policies.IsAdmin">
             <ItemsAddForm OnItemsChange="@ChangeItems" />
             <br />
             <br />
             <hr />
-            <h2>Таблица квестовых предметов</h2>
-            <ItemsTable />
-        </CascadingValue>
-    }
-</AuthorizeView>
+        </AuthorizeView>
+        <h2>Таблица квестовых предметов</h2>
+        <ItemsTable />
+    </CascadingValue>
+}
 
 @code {
     private List<Item> _items { get; set; }
