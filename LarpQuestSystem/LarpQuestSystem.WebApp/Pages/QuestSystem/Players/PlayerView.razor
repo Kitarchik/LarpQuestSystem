@@ -1,0 +1,94 @@
+﻿@page "/players/{PlayerId:int}"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
+
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.WebApp.Components.Utils
+@using LarpQuestSystem.WebApp.Components.QuestSystem.Quests
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+
+<h1>Игрок</h1>
+
+@if (_player == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p>Имя: @_player.Player.Name</p>
+    <p>Описание: @_player.Player.Description</p>
+    <p>Локация: <button class="btn btn-primary" @onclick="(() => NavigateToLocationView(_player.Player.LocationId))">@_player.Location.Name</button></p>
+    <AuthorizeView Policy="@Policies.IsAdmin">
+        <div style="margin-bottom: 10px">
+            <button class="btn btn-primary" @onclick="@EditPlayer">Редактировать игрока</button>
+            <button class="btn btn-primary" @onclick="@DeletePlayer">Удалить игрока</button>
+        </div>
+    </AuthorizeView>
+    if (Quests.Any())
+    {
+        <br />
+        <br />
+        <hr />
+        <CascadingValue Value=@Quests>
+            <QuestsShortTable />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private PlayerInfoView _player;
+    private List<Quest> Quests { get; set; }
+
+    [Parameter]
+    public int PlayerId { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _player = await Http.GetJsonAsync<PlayerInfoView>($"{BaseApiUrl}/players/{PlayerId}");
+        Quests = _player.Quests;
+    }
+
+    private async Task DeletePlayer()
+    {
+        if (Quests.Any())
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "ЭЭЭ! Он же квестами занимается! Удали сначала квесты.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var response = await Http.DeleteAsync($"{BaseApiUrl}/players/{PlayerId}");
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/players");
+            }
+            else
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Что-то пошло не так.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private void EditPlayer()
+    {
+        NavigationManager.NavigateTo($"/players/edit/{PlayerId}");
+    }
+
+    private void NavigateToLocationView(int locationId)
+    {
+        NavigationManager.NavigateTo($"/locations/{locationId}");
+    }
+
+}

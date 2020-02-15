@@ -1,0 +1,47 @@
+﻿@page "/chains"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.WebApp.Components.QuestSystem.Chains
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<h1>Цепочки квестов</h1>
+
+@if (_chains == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_chains>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <ChainsAddForm OnChainsChange="@ChangeChains" />
+            <br />
+            <br />
+            <hr />
+        </AuthorizeView>
+        <h2>Таблица цепочек</h2>
+        <ChainsTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Chain> _chains { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chains = await Http.GetJsonAsync<List<Chain>>($"{BaseApiUrl}/chains");
+    }
+
+    private void ChangeChains(List<Chain> chains)
+    {
+        _chains = chains;
+        StateHasChanged();
+    }
+}

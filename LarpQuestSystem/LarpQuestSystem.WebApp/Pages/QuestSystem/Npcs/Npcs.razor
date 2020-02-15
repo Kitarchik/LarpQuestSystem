@@ -1,0 +1,46 @@
+﻿@page "/npcs"
+@attribute [Authorize(Policy = Policies.IsScriptWriter)]
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.WebApp.Components.QuestSystem.Npcs
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Список НПС</h1>
+
+@if (_npcs == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_npcs>
+        <AuthorizeView Policy="@Policies.IsAdmin">
+            <NpcsAddForm OnNpcsChange="ChangeNpcs" />
+            <br />
+            <br />
+            <hr />
+        </AuthorizeView>
+        <h2>Таблица НПС</h2>
+        <NpcsShortTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<Npc> _npcs { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _npcs = await Http.GetJsonAsync<List<Npc>>($"{BaseApiUrl}/npcs");
+    }
+
+    private void ChangeNpcs(List<Npc> npcs)
+    {
+        _npcs = npcs;
+        StateHasChanged();
+    }
+}

@@ -1,11 +1,10 @@
 ﻿using Blazored.LocalStorage;
-using LarpQuestSystem.Data.Model;
+using LarpQuestSystem.Data.Model.Security;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using LarpQuestSystem.Data.Model.Security;
 
 namespace LarpQuestSystem.WebApp.Services
 {
@@ -14,8 +13,8 @@ namespace LarpQuestSystem.WebApp.Services
         private readonly HttpClient _httpClient;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly ILocalStorageService _localStorage;
-        //private static readonly string BaseApiUrl = "http://localhost/LarpQuestSystem/api";
-        private static readonly string BaseApiUrl = "https://larpquestsystemapi20200213034822.azurewebsites.net/api";
+        private static readonly string BaseApiUrl = "http://localhost/LarpQuestSystem/api";
+        //private static readonly string BaseApiUrl = "https://larpquestsystemapi20200213034822.azurewebsites.net/api";
 
         public AuthService(HttpClient httpClient,
             AuthenticationStateProvider authenticationStateProvider,

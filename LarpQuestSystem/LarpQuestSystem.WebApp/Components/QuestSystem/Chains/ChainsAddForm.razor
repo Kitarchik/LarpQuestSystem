@@ -1,0 +1,194 @@
+﻿@using System.Net
+@using LarpQuestSystem.Data.Model.QuestSystem
+@using Newtonsoft.Json
+@using LarpQuestSystem.WebApp.Components.Utils
+
+@inject HttpClient Http
+@inject IModalService Modal
+
+@if (!_showForm)
+{
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@ShowForm">Создать цепочку</button>
+    </div>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtChainName" class="col-sm-2 col-form-label">Имя цепочки</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtChainName" class="form-control" @bind="@_chain.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtChainDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtChainDescription" rows="5" @bind="@_chain.Description"></textarea>
+        </div>
+    </div>
+    @if (_selectedQuests != null)
+    {
+        @for (int i = 0; i < _selectedQuests.Count; i++)
+        {
+            <div class="form-group row">
+                <div class="col-sm-10">
+                    <p><em>Шаг @(i + 1): @_selectedQuests[i].Name</em></p>
+                </div>
+            </div>
+        }
+    }
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Следующий шаг</label>
+        <FilterItems Items="@Quests.Select(x=>x.Name).ToList()" OnItemSelect="@SelectQuest" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@IncreaseSteps">Добавить шаг</button>
+        <button class="btn btn-primary" @onclick="@DecreaseSteps">Убрать шаг</button>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@HideForm">Отмена</button>
+    </div>
+}
+
+@code
+{
+    [CascadingParameter]
+    private List<Chain> Chains { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    [Parameter]
+    public Action<List<Chain>> OnChainsChange { get; set; }
+
+    private List<Quest> Quests { get; set; }
+
+    private List<Quest> _selectedQuests;
+    private bool _showForm;
+    private Quest _selectedQuest;
+    private Chain _chain;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chain = new Chain();
+        _selectedQuests = new List<Quest>();
+        Quests = await Http.GetJsonAsync<List<Quest>>($"{BaseApiUrl}/quests");
+    }
+
+    private void ShowForm()
+    {
+        _showForm = true;
+        StateHasChanged();
+    }
+
+    private void HideForm()
+    {
+        _showForm = false;
+        _selectedQuest = null;
+        _selectedQuests.Clear();
+        StateHasChanged();
+    }
+
+    private void SelectQuest(string questName)
+    {
+        _selectedQuest = Quests.First(x => x.Name == questName);
+    }
+
+    private void IncreaseSteps()
+    {
+        if (_selectedQuest != null && _selectedQuest.Id > 0)
+        {
+            _selectedQuests.Add(new Quest
+            {
+                Id = _selectedQuest.Id,
+                Name = _selectedQuest.Name,
+            });
+            _selectedQuest = null;
+            StateHasChanged();
+        }
+    }
+
+    private void DecreaseSteps()
+    {
+        if (_selectedQuests != null && _selectedQuests.Count > 0)
+        {
+            _selectedQuests.RemoveAt(_selectedQuests.Count - 1);
+            StateHasChanged();
+        }
+    }
+
+    protected async Task Submit()
+    {
+        if (string.IsNullOrEmpty(_chain.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (_selectedQuests.Select(x => x.Id).Distinct().Count() < _selectedQuests.Count)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Нельзя выбирать повторяющиеся квесты.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var requestMessage = new HttpRequestMessage()
+            {
+                Method = new HttpMethod("POST"),
+                RequestUri = new Uri($"{BaseApiUrl}/chains"),
+                Content =
+                    new StringContent(JsonConvert.SerializeObject(new Chain
+                    {
+                        Name = _chain.Name,
+                        Description = _chain.Description,
+                    })),
+            };
+
+            requestMessage.Content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(
+                    "application/json");
+
+            var response = await Http.SendAsync(requestMessage);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonTask = response.Content.ReadAsStringAsync();
+                jsonTask.Wait();
+                _chain = JsonConvert.DeserializeObject<Chain>(jsonTask.Result);
+                _chain.QuestChains = new List<QuestChain>();
+                for (int i = 0; i < _selectedQuests.Count; i++)
+                {
+                    var questChain = new QuestChain
+                    {
+                        ChainId = _chain.Id,
+                        StepNumber = i + 1,
+                        QuestId = _selectedQuests[i].Id,
+                    };
+                    _chain.QuestChains.Add(questChain);
+                    await Http.PostJsonAsync<QuestChain>($"{BaseApiUrl}/questChains", questChain);
+                }
+                ChangeChains();
+                _chain = new Chain();
+                _selectedQuests = new List<Quest>();
+                _showForm = false;
+                StateHasChanged();
+            }
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Цепочка с таким именем уже существует.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private void ChangeChains()
+    {
+        Chains.Add(_chain);
+        OnChainsChange?.Invoke(Chains);
+    }
+}
