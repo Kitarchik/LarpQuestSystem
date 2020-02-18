@@ -1,6 +1,5 @@
 using Blazored.LocalStorage;
 using Blazored.Modal;
-using LarpQuestSystem.Data.Model;
 using LarpQuestSystem.Data.Model.Security;
 using LarpQuestSystem.WebApp.Services;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -20,6 +19,8 @@ namespace LarpQuestSystem.WebApp
                 config.AddPolicy(Policies.IsUser, Policies.IsUserPolicy());
                 config.AddPolicy(Policies.IsSuperUser, Policies.IsSuperUserPolicy());
                 config.AddPolicy(Policies.IsScriptWriter, Policies.IsScriptWriterPolicy());
+                config.AddPolicy(Policies.IsScriptManager, Policies.IsScriptManagerPolicy());
+                config.AddPolicy(Policies.IsMaterialsManager, Policies.IsMaterialsManagerPolicy());
             });
             services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             services.AddScoped<IAuthService, AuthService>();

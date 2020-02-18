@@ -15,9 +15,9 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class ChainsController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
 
-        public ChainsController(QuestContext context)
+        public ChainsController(LarpSystemContext context)
         {
             _db = context;
         }
@@ -62,7 +62,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return new ObjectResult(chainInfo);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPost]
         public async Task<ActionResult<Chain>> Post(Chain chain)
         {
@@ -81,7 +81,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(chain);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPut]
         public async Task<ActionResult<Chain>> Put(Chain chain)
         {
@@ -99,7 +99,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(chain);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Chain>> Delete(int id)
         {

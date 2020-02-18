@@ -8,11 +8,11 @@ namespace LarpQuestSystem.Data.Model.QuestSystem
         VeryEasy = 0,
         [StringValue("Простой (200 опыта)")]
         Easy = 1,
-        [StringValue("Обычный (600 опыта)")]
+        [StringValue("Обычный (400 опыта)")]
         Normal = 2,
-        [StringValue("Сложный (1000 опыта)")]
+        [StringValue("Сложный (800 опыта)")]
         Hard = 3,
-        [StringValue("Очень сложный (2000 опыта)")]
+        [StringValue("Очень сложный (1500 опыта)")]
         VeryHard = 4,
     }
 }

@@ -17,31 +17,38 @@
 }
 else
 {
-    <EditForm Model="@_location" OnValidSubmit="@Submit">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+<EditForm Model="@_location" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <div class="form-group row">
-            <label for="txtLocationName" class="col-sm-2 col-form-label">Название локации</label>
-            <div class="col-sm-10">
-                <InputText id="txtLocationName" class="form-control" @bind-Value="@_location.Name"></InputText>
-                <ValidationMessage For="@(() => _location.Name)"></ValidationMessage>
-            </div>
+    <div class="form-group row">
+        <label for="txtLocationName" class="col-sm-2 col-form-label">Название локации</label>
+        <div class="col-sm-10">
+            <InputText id="txtLocationName" class="form-control" @bind-Value="@_location.Name"></InputText>
+            <ValidationMessage For="@(() => _location.Name)"></ValidationMessage>
         </div>
-        <div class="form-group row">
-            <label for="txtLocationDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtLocationDescription" rows="5" @bind="@_location.Description"></textarea>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtLocationDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtLocationDescription" rows="5" @bind="@_location.Description"></textarea>
         </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+    </div>
+    <div class="form-group row">
+        <label for="txtRequestsPayed" class="col-sm-2 col-form-label">Количество оплаченных заявок</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtRequestsPayed" class="form-control" @bind="@_requestsPayedString" />
         </div>
-    </EditForm>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
 }
 
 @code {
     private string _message = "Загрузка...";
+    private string _requestsPayedString;
     private Location _location;
     private List<Location> _locations;
 
@@ -54,6 +61,7 @@ else
     {
         _locations = await Http.GetJsonAsync<List<Location>>($"{BaseApiUrl}/locations");
         _location = _locations.FirstOrDefault(x => x.Id == LocationId);
+        _requestsPayedString = _location.RequestsPayed.ToString();
     }
 
     protected async Task Submit()
@@ -72,8 +80,16 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
+        else if (!int.TryParse(_requestsPayedString, out int result) || result < 0)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Введите нормальное число оплаченных заявок. Будьте людьми то.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
         else
         {
+            _location.RequestsPayed = int.Parse(_requestsPayedString);
             await Http.PutJsonAsync<Location>($"{BaseApiUrl}/locations", _location);
             NavigationManager.NavigateTo($"/locations/{LocationId}");
         }

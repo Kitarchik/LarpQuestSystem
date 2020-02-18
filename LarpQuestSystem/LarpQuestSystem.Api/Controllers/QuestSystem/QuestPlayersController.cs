@@ -15,9 +15,9 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class QuestPlayersController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
 
-        public QuestPlayersController(QuestContext context)
+        public QuestPlayersController(LarpSystemContext context)
         {
             _db = context;
         }
@@ -37,7 +37,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return new ObjectResult(questPlayer);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPost]
         public async Task<ActionResult<QuestPlayer>> Post(QuestPlayer questPlayer)
         {
@@ -51,7 +51,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(questPlayer);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPut]
         public async Task<ActionResult<QuestPlayer>> Put(QuestPlayer questPlayer)
         {
@@ -69,7 +69,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(questPlayer);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<QuestPlayer>> Delete(int id)
         {

@@ -15,9 +15,9 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
 
-        public ItemsController(QuestContext context)
+        public ItemsController(LarpSystemContext context)
         {
             _db = context;
         }
@@ -76,7 +76,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return new ObjectResult(itemInfo);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPost]
         public async Task<ActionResult<Item>> Post(Item item)
         {
@@ -95,7 +95,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(item);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPut]
         public async Task<ActionResult<Item>> Put(Item item)
         {
@@ -162,7 +162,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             }
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Item>> Delete(int id)
         {

@@ -20,8 +20,8 @@ namespace LarpQuestSystem.Api
 
                 var identityContext = services.GetService<LarpIdentityContext>();
                 identityContext.Database.Migrate();
-                var questContext = services.GetService<QuestContext>();
-                questContext.Database.Migrate();
+                var mainContext = services.GetService<LarpSystemContext>();
+                mainContext.Database.Migrate();
 
                 var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
                 var rolesManager = services.GetRequiredService<RoleManager<IdentityRole>>();

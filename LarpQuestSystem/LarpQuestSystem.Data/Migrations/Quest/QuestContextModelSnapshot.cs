@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LarpQuestSystem.Data.Migrations.Quest
 {
-    [DbContext(typeof(QuestContext))]
+    [DbContext(typeof(LarpSystemContext))]
     partial class QuestContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

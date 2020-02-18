@@ -1,0 +1,130 @@
+﻿@page "/materials/edit/{MaterialId:int}"
+@attribute [Authorize(Policy = Policies.IsMaterialsManager)]
+@using LarpQuestSystem.Data.Model.MaterialManagement
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.Data.Model.Utilities
+@using LarpQuestSystem.WebApp.Components.Utils
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Редактировать локацию</h1>
+
+@if (_material == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <div class="form-group row">
+        <label for="txtMaterialName" class="col-sm-2 col-form-label">Название материала</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtMaterialName" class="form-control" @bind="@_material.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtAmountPerPayedRequest" class="col-sm-2 col-form-label">Сколько положено единиц за одну оплаченную заявку</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtAmountPerPayedRequest" class="form-control" @bind="@_amountPerPayedRequestString" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtPriceString" class="col-sm-2 col-form-label">Цена</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtPriceString" class="form-control" @bind="@_priceString" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="unitsOfMeasure" class="col-sm-2 col-form-label">Единицы измерения</label>
+        <div class="col-sm-10">
+            <select id="unitsOfMeasure" @bind="@_material.UnitOfMeasure">
+                @foreach (int units in Enum.GetValues(typeof(MaterialUnitOfMeasure)))
+                {
+                    <option value="@units">@GetStringUnitValue(units)</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="@Submit">Сохранить</button>
+        <button class="btn btn-primary" @onclick="@Cancel">Отмена</button>
+    </div>
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private string _amountPerPayedRequestString;
+    private string _priceString;
+    private MaterialInfoView _material;
+    private List<MaterialWithTotalView> _materials;
+
+    [Parameter]
+    public int MaterialId { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _material = await Http.GetJsonAsync<MaterialInfoView>($"{BaseApiUrl}/materials/{MaterialId}");
+        _materials = await Http.GetJsonAsync<List<MaterialWithTotalView>>($"{BaseApiUrl}/materials");
+        _amountPerPayedRequestString = _material.AmountPerPayedRequestInLocation.ToString();
+        _priceString = _material.Price.ToString();
+    }
+
+    protected async Task Submit()
+    {
+        if (_materials.Any(x => x.Name == _material.Name && x.Id != _material.Id))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Стройматериал с таким именем уже существует.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (string.IsNullOrEmpty(_material.Name))
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Имя не может быть пустым.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (!int.TryParse(_amountPerPayedRequestString, out int result) || result < 0)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Введите нормальное количество единиц за заявку. Будьте людьми то.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else if (!int.TryParse(_priceString, out int result2) || result2 < 0)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Введите нормальную цену. Будьте людьми то.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var material = new Material
+            {
+                Id = _material.Id,
+                Name = _material.Name,
+                UnitOfMeasure = _material.UnitOfMeasure,
+                Price = int.Parse(_priceString),
+                AmountPerPayedRequestInLocation = int.Parse(_amountPerPayedRequestString),
+            };
+            await Http.PutJsonAsync<Material>($"{BaseApiUrl}/materials", material);
+            NavigationManager.NavigateTo($"/materials/{MaterialId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo($"/materials/{MaterialId}");
+    }
+
+    private string GetStringUnitValue(int units)
+    {
+        var enumValue = (MaterialUnitOfMeasure)units;
+        return enumValue.GetStringValue();
+    }
+}

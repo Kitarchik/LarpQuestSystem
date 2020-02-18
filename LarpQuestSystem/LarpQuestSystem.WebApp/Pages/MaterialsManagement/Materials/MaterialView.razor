@@ -1,0 +1,93 @@
+﻿@page "/materials/{MaterialId:int}"
+@attribute [Authorize(Policy = Policies.IsMaterialsManager)]
+@using LarpQuestSystem.Data.Model.MaterialManagement
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.Data.Model.Utilities
+@using LarpQuestSystem.WebApp.Components.Utils
+@using LarpQuestSystem.WebApp.Components.MaterialsManagement.Materials
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IModalService Modal
+
+<h1>Стройматериал</h1>
+
+@if (_material == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <p><em>Название: @_material.Name</em></p>
+    <p><em>Цена: @_material.Price</em></p>
+    <p><em>Кол-во единиц за заявку : @_material.AmountPerPayedRequestInLocation</em></p>
+    <p><em>Единицы измерения: @GetUnits(_material.UnitOfMeasure)</em></p>
+    <div style="margin-bottom: 10px">
+        <button class="btn btn-primary" @onclick="@EditMaterial">Редактировать материал</button>
+        <button class="btn btn-primary" @onclick="@DeleteMaterial">Удалить материал</button>
+    </div>
+    @if (_material.SingleMaterialRequestInfoViews.Any())
+    {
+        <br />
+        <br />
+        <hr />
+        <h2>Заявки, в которых заказан этот материал</h2>
+        <CascadingValue Value=@_material.SingleMaterialRequestInfoViews>
+            <SingleMaterialsRequestsTable />
+        </CascadingValue>
+    }
+}
+
+@code {
+    private string _message = "Загрузка...";
+    private MaterialInfoView _material;
+
+    [Parameter]
+    public int MaterialId { get; set; }
+
+    [CascadingParameter(Name = "BaseApiUrl")]
+    protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _material = await Http.GetJsonAsync<MaterialInfoView>($"{BaseApiUrl}/materials/{MaterialId}");
+    }
+
+    private async Task DeleteMaterial()
+    {
+        if (_material.SingleMaterialRequestInfoViews.Any())
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "А как же заказы этого материала? Удалите сначала их.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
+        else
+        {
+            var response = await Http.DeleteAsync($"{BaseApiUrl}/materials/{MaterialId}");
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/materials");
+            }
+            else
+            {
+                var parameters = new ModalParameters();
+                parameters.Add("Message", "Что-то пошло не так.");
+
+                Modal.Show<Notification>("Notification", parameters);
+            }
+        }
+    }
+
+    private string GetUnits(int units)
+    {
+        var enumValue = (MaterialUnitOfMeasure)units;
+        return enumValue.GetStringValue();
+    }
+
+    private void EditMaterial()
+    {
+        NavigationManager.NavigateTo($"/materials/edit/{MaterialId}");
+    }
+
+}

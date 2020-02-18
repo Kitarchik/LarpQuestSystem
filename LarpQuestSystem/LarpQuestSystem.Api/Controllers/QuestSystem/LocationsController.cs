@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using LarpQuestSystem.Data;
+using LarpQuestSystem.Data.Model.MaterialManagement;
 using LarpQuestSystem.Data.Model.QuestSystem;
 using LarpQuestSystem.Data.Model.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +16,9 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class LocationsController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
 
-        public LocationsController(QuestContext context)
+        public LocationsController(LarpSystemContext context)
         {
             _db = context;
         }
@@ -45,6 +46,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
                     Id = location.Id,
                     Description = location.Description,
                     Name = location.Name,
+                    RequestsPayed = location.RequestsPayed,
                 },
                 Npcs = location.Npcs.Select(x => new Npc
                 {
@@ -63,7 +65,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return new ObjectResult(locationInfo);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPost]
         public async Task<ActionResult<Location>> Post(Location location)
         {
@@ -79,10 +81,14 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
 
             _db.Locations.Add(location);
             await _db.SaveChangesAsync();
+            if (location.RequestsPayed > 0)
+            {
+                AddMaterialsRequest(location);
+            }
             return Ok(location);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPut]
         public async Task<ActionResult<Location>> Put(Location location)
         {
@@ -95,12 +101,24 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
                 return NotFound();
             }
 
+            var oldLocation = _db.Locations.AsNoTracking().First(x => x.Id == location.Id);
+            if (oldLocation.RequestsPayed == 0 && location.RequestsPayed > 0)
+            {
+                AddMaterialsRequest(location);
+            }
+
+            if (oldLocation.RequestsPayed > 0 && location.RequestsPayed == 0)
+            {
+                DeleteMaterialsRequest(location);
+            }
+
             _db.Update(location);
             await _db.SaveChangesAsync();
+
             return Ok(location);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Location>> Delete(int id)
         {
@@ -112,6 +130,48 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             _db.Locations.Remove(location);
             await _db.SaveChangesAsync();
             return Ok(location);
+        }
+
+        private void AddMaterialsRequest(Location location)
+        {
+            var materialsRequest = new MaterialsRequest
+            {
+                Customer = "За взносы",
+                IsPayed = true,
+                LocationId = location.Id
+            };
+            _db.MaterialsRequests.Add(materialsRequest);
+            _db.SaveChanges();
+            var materialsForPayedRequests = _db.Materials.Where(x => x.AmountPerPayedRequestInLocation > 0).ToList();
+            foreach (var material in materialsForPayedRequests)
+            {
+                var singleMaterialRequest = new SingleMaterialRequest
+                {
+                    MaterialId = material.Id,
+                    MaterialsRequestId = materialsRequest.Id,
+                    QuantityOrdered = location.RequestsPayed * material.AmountPerPayedRequestInLocation,
+                    QuantityServed = 0,
+                };
+                _db.SingleMaterialRequests.Add(singleMaterialRequest);
+                _db.SaveChanges();
+            }
+        }
+
+        private void DeleteMaterialsRequest(Location location)
+        {
+            var materialsRequest = _db.MaterialsRequests
+                .First(x => x.IsPayed && 
+                            x.Customer == "За взносы" &&
+                            x.LocationId == location.Id);
+
+            foreach (var singleRequest in materialsRequest.SingleMaterialRequests)
+            {
+
+                _db.SingleMaterialRequests.Remove(singleRequest);
+                _db.SaveChanges();
+            }
+
+            _db.MaterialsRequests.Remove(materialsRequest);
         }
     }
 }

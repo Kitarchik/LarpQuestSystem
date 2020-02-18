@@ -1,10 +1,10 @@
-﻿using LarpQuestSystem.Data.Model;
+﻿using LarpQuestSystem.Data.Model.MaterialManagement;
 using LarpQuestSystem.Data.Model.QuestSystem;
 using Microsoft.EntityFrameworkCore;
 
 namespace LarpQuestSystem.Data
 {
-    public sealed class QuestContext : DbContext
+    public sealed class LarpSystemContext : DbContext
     {
         public DbSet<Quest> Quests { get; set; }
         public DbSet<QuestChain> QuestChains { get; set; }
@@ -15,10 +15,11 @@ namespace LarpQuestSystem.Data
         public DbSet<Chain> Chains { get; set; }
         public DbSet<QuestPlayer> QuestPlayers { get; set; }
         public DbSet<Player> Players { get; set; }
+        public DbSet<Material> Materials { get; set; }
+        public DbSet<SingleMaterialRequest> SingleMaterialRequests { get; set; }
+        public DbSet<MaterialsRequest> MaterialsRequests { get; set; }
 
-        public QuestContext(DbContextOptions<QuestContext> options) : base(options)
-        {
-        }
+        public LarpSystemContext(DbContextOptions<LarpSystemContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,6 +81,18 @@ namespace LarpQuestSystem.Data
                 .HasOne(x => x.Location)
                 .WithMany(x => x.Players)
                 .HasForeignKey(x => x.LocationId);
+            modelBuilder.Entity<Material>()
+                .HasMany(m => m.SingleMaterialRequests)
+                .WithOne(s => s.Material)
+                .HasForeignKey(s => s.MaterialId);
+            modelBuilder.Entity<MaterialsRequest>()
+                .HasMany(m => m.SingleMaterialRequests)
+                .WithOne(s => s.MaterialsRequest)
+                .HasForeignKey(s => s.MaterialsRequestId);
+            modelBuilder.Entity<Location>()
+                .HasMany(l => l.MaterialsRequests)
+                .WithOne(m => m.Location)
+                .HasForeignKey(m => m.LocationId);
 
             modelBuilder.Entity<Chain>()
                 .Property(x => x.Name)
@@ -147,6 +160,15 @@ namespace LarpQuestSystem.Data
             modelBuilder.Entity<QuestItem>()
                 .Property(x => x.TechnicalDocumentForNpc)
                 .HasMaxLength(2000);
+            modelBuilder.Entity<Material>()
+                .HasIndex(x => x.Name)
+                .IsUnique();
+            modelBuilder.Entity<Material>()
+                .Property(x => x.Name)
+                .HasMaxLength(250);
+            modelBuilder.Entity<MaterialsRequest>()
+                .Property(x => x.Customer)
+                .HasMaxLength(250);
         }
     }
 }

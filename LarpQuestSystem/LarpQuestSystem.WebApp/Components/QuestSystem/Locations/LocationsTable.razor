@@ -1,5 +1,4 @@
-﻿@using LarpQuestSystem.Data.Model
-@using LarpQuestSystem.Data.Model.QuestSystem
+﻿@using LarpQuestSystem.Data.Model.QuestSystem
 @inject NavigationManager NavigationManager
 
 <input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название локации" />
@@ -8,6 +7,7 @@
         <tr>
             <th>Название локации</th>
             <th>Описание</th>
+            <th>Кол-во оплаченных заявок</th>
         </tr>
     </thead>
     <tbody>
@@ -16,6 +16,7 @@
             <tr @onclick="(() => NavigateToLocationView(location.Id))">
                 <td>@location.Name</td>
                 <td>@location.Description</td>
+                <td>@location.RequestsPayed</td>
             </tr>
         }
     </tbody>

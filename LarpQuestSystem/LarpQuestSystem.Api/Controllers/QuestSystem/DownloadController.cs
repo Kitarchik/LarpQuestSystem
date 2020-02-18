@@ -17,10 +17,10 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class DownloadController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
         private static DriveService _driveService;
 
-        public DownloadController(QuestContext context)
+        public DownloadController(LarpSystemContext context)
         {
             _db = context;
             _driveService = GetDriveService();

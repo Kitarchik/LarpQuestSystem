@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LarpQuestSystem.Data.Migrations.Quest
 {
-    [DbContext(typeof(QuestContext))]
+    [DbContext(typeof(LarpSystemContext))]
     [Migration("20200213133711_Initial2")]
     partial class Initial2
     {

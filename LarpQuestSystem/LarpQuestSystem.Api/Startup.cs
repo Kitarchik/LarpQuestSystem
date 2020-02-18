@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace LarpQuestSystem.Api
 {
@@ -27,7 +26,7 @@ namespace LarpQuestSystem.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var connection = Configuration.GetConnectionString("QuestDatabase");
-            services.AddDbContext<QuestContext>(options => options.UseSqlServer(connection));
+            services.AddDbContext<LarpSystemContext>(options => options.UseSqlServer(connection));
             services.AddDbContext<LarpIdentityContext>(options => options.UseSqlServer(connection));
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
@@ -63,7 +62,6 @@ namespace LarpQuestSystem.Api
                     ClockSkew = TimeSpan.FromMinutes(5) //5 minute tolerance for the expiration date
                 };
             });
-            ;
 
             services.AddAuthorization(config =>
             {
@@ -71,6 +69,8 @@ namespace LarpQuestSystem.Api
                 config.AddPolicy(Policies.IsUser, Policies.IsUserPolicy());
                 config.AddPolicy(Policies.IsSuperUser, Policies.IsSuperUserPolicy());
                 config.AddPolicy(Policies.IsScriptWriter, Policies.IsScriptWriterPolicy());
+                config.AddPolicy(Policies.IsScriptManager, Policies.IsScriptManagerPolicy());
+                config.AddPolicy(Policies.IsMaterialsManager, Policies.IsMaterialsManagerPolicy());
             });
         }
 

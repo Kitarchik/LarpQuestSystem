@@ -1,0 +1,98 @@
+﻿@using LarpQuestSystem.Data.Model.MaterialManagement
+@inject IModalService Modal
+@inject NavigationManager NavigationManager
+
+<div class="row">
+    <div class="col-sm">
+        <input type="text" id="filterByCustomer" @bind-value="@FilterCustomer" @bind-value:event="oninput" placeholder="Заказчик" />
+    </div>
+    <div class="col-sm">
+        <input type="text" id="filterByLocation" @bind-value="@FilterLocation" @bind-value:event="oninput" placeholder="Локация" />
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Заказчик</th>
+            <th>Локация</th>
+            <th>Оплачен</th>
+            <th>Всего единиц заказано</th>
+            <th>Всего единиц доставлено</th>
+            <th>Доставить</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var material in _filteredMaterials)
+        {
+            <tr @onclick="(() => NavigateToMaterialsRequestView(material.MaterialsRequestId))">
+                <td>@material.Customer</td>
+                <td>@material.LocationName</td>
+                <td>@material.IsPayed</td>
+                <td>@material.QuantityOrdered</td>
+                <td>@material.QuantityServed</td>
+                <td>
+                    @if (material.QuantityServed < material.QuantityOrdered)
+                    {
+                        <button class="btn btn-primary" @onclick="@(() => NavigateToServeMaterialView(material.Id))"> <span class="oi oi-pencil" aria-hidden="true"></span>Доставить материал</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<SingleMaterialRequestInfoView> _filteredMaterials;
+    private string _filterCustomer = string.Empty;
+    private string _filterLocation = string.Empty;
+
+    [CascadingParameter]
+    private List<SingleMaterialRequestInfoView> Materials { get; set; }
+
+    public string FilterCustomer
+    {
+        get => _filterCustomer;
+        set
+        {
+            _filterCustomer = value;
+            FilterMaterials();
+        }
+    }
+
+    public string FilterLocation
+    {
+        get => _filterLocation;
+        set
+        {
+            _filterLocation = value;
+            FilterMaterials();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredMaterials = Materials;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterMaterials()
+    {
+        _filteredMaterials = Materials
+            .Where(x => x.Customer.Contains(_filterCustomer, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.LocationName.Contains(_filterLocation, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        StateHasChanged();
+    }
+
+    private void NavigateToServeMaterialView(int singleMaterialRequestId)
+    {
+        NavigationManager.NavigateTo($"/materials/serve/{singleMaterialRequestId}");
+    }
+
+    private void NavigateToMaterialsRequestView(int materialsRequestId)
+    {
+        NavigationManager.NavigateTo($"/materials/requests/{materialsRequestId}");
+    }
+}

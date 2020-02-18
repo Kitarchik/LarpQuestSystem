@@ -1,0 +1,73 @@
+﻿@using LarpQuestSystem.Data.Model.MaterialManagement
+@using LarpQuestSystem.Data.Model.Utilities
+@inject NavigationManager NavigationManager
+
+<input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название материала" />
+<table class="table">
+    <thead>
+        <tr>
+            <th>Название материала</th>
+            <th>Единицы измерения</th>
+            <th>Цена за единицу товара</th>
+            <th>Всего единиц заказано</th>
+            <th>Всего единиц доставлено</th>
+            <th>Всего единиц оплачено</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var material in _filteredMaterials)
+        {
+            <tr @onclick="(() => NavigateToMaterialView(material.Id))">
+                <td>@material.Name</td>
+                <td>@GetUnits(material.UnitOfMeasure)</td>
+                <td>@material.Price</td>
+                <td>@material.TotalOrdered</td>
+                <td>@material.TotalServed</td>
+                <td>@material.TotalPayed</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    private List<MaterialWithTotalView> _filteredMaterials;
+    private string _filterString = string.Empty;
+
+    [CascadingParameter]
+    private List<MaterialWithTotalView> Materials { get; set; }
+
+    public string FilterString
+    {
+        get => _filterString;
+        set
+        {
+            _filterString = value;
+            FilterMaterials();
+        }
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        _filteredMaterials = Materials;
+        return base.OnParametersSetAsync();
+    }
+
+    private void FilterMaterials()
+    {
+        _filteredMaterials = Materials.Where(x => x.Name.Contains(_filterString, StringComparison.OrdinalIgnoreCase)).ToList();
+        StateHasChanged();
+    }
+
+    private string GetUnits(int units)
+    {
+        var enumValue = (MaterialUnitOfMeasure)units;
+        return enumValue.GetStringValue();
+    }
+
+    private void NavigateToMaterialView(int materialId)
+    {
+        NavigationManager.NavigateTo($"/materials/{materialId}");
+    }
+
+}

@@ -1,0 +1,45 @@
+﻿@page "/materials"
+@attribute [Authorize(Policy = Policies.IsMaterialsManager)]
+@using LarpQuestSystem.Data.Model.MaterialManagement
+@using LarpQuestSystem.Data.Model.Security
+@using LarpQuestSystem.WebApp.Components.MaterialsManagement.Materials
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+
+<h1>Стройматериалы</h1>
+
+@if (_materials == null)
+{
+    <p><em>@_message</em></p>
+}
+else
+{
+    <CascadingValue Value=@_materials>
+        <MaterialsAddForm OnMaterialsChange="@ChangeMaterials" />
+        <br />
+        <br />
+        <hr />
+        <h2>Таблица материалов</h2>
+        <MaterialsTable />
+    </CascadingValue>
+}
+
+@code {
+    private List<MaterialWithTotalView> _materials { get; set; }
+    private string _message = "Загрузка...";
+
+    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _materials = await Http.GetJsonAsync<List<MaterialWithTotalView>>($"{BaseApiUrl}/materials");
+    }
+
+    private void ChangeMaterials(List<MaterialWithTotalView> materials)
+    {
+        _materials = materials;
+        StateHasChanged();
+    }
+}

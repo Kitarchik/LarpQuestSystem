@@ -1,5 +1,4 @@
 ﻿@using System.Net
-@using LarpQuestSystem.Data.Model
 @using LarpQuestSystem.Data.Model.QuestSystem
 @using Newtonsoft.Json
 @using LarpQuestSystem.WebApp.Components.Utils
@@ -31,6 +30,12 @@ else
                 <textarea class="form-control" id="txtLocationDescription" rows="5" @bind="@_locationToAdd.Description"></textarea>
             </div>
         </div>
+        <div class="form-group row">
+            <label for="txtAmountToPrint" class="col-sm-2 col-form-label">Количество оплаченных заявок игроков</label>
+            <div class="col-sm-10">
+                <input type="text" id="txtAmountToPrint" class="form-control" @bind="@_requestsPayedString" />
+            </div>
+        </div>
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <button class="btn btn-primary" @onclick="HideForm">Отмена</button>
@@ -50,6 +55,7 @@ else
 
     private Location _locationToAdd;
     private bool _showForm;
+    private string _requestsPayedString = "0";
 
     protected override void OnInitialized()
     {
@@ -67,6 +73,7 @@ else
     {
         _showForm = false;
         _locationToAdd = new Location();
+        _requestsPayedString = "0";
         StateHasChanged();
     }
 
@@ -79,8 +86,16 @@ else
 
             Modal.Show<Notification>("Notification", parameters);
         }
+        else if (!int.TryParse(_requestsPayedString, out int result) || result < 0)
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("Message", "Введите нормальное число оплаченных заявок. Будьте людьми то.");
+
+            Modal.Show<Notification>("Notification", parameters);
+        }
         else
         {
+            _locationToAdd.RequestsPayed = int.Parse(_requestsPayedString);
             var requestMessage = new HttpRequestMessage()
             {
                 Method = new HttpMethod("POST"),
@@ -101,6 +116,7 @@ else
                 _locationToAdd = JsonConvert.DeserializeObject<Location>(jsonTask.Result);
                 ChangeLocations();
                 _locationToAdd = new Location();
+                _requestsPayedString = "0";
                 _showForm = false;
                 StateHasChanged();
             }

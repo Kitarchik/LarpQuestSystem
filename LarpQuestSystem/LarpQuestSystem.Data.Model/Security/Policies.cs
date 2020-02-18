@@ -8,6 +8,8 @@ namespace LarpQuestSystem.Data.Model.Security
         public const string IsUser = "IsUser";
         public const string IsSuperUser = "IsSuperUser";
         public const string IsScriptWriter = "IsScriptWriter";
+        public const string IsScriptManager = "IsScriptManager";
+        public const string IsMaterialsManager = "IsMaterialsManager";
 
         public static AuthorizationPolicy IsAdminPolicy()
         {
@@ -26,7 +28,21 @@ namespace LarpQuestSystem.Data.Model.Security
         public static AuthorizationPolicy IsScriptWriterPolicy()
         {
             return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
-                .RequireRole(Roles.ScriptWriter, Roles.Admin, Roles.SuperUser)
+                .RequireRole(Roles.ScriptManager, Roles.ScriptWriter, Roles.Admin, Roles.SuperUser)
+                .Build();
+        }
+
+        public static AuthorizationPolicy IsScriptManagerPolicy()
+        {
+            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
+                .RequireRole(Roles.ScriptManager, Roles.Admin, Roles.SuperUser)
+                .Build();
+        }
+
+        public static AuthorizationPolicy IsMaterialsManagerPolicy()
+        {
+            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser()
+                .RequireRole(Roles.MaterialsManager, Roles.Admin, Roles.SuperUser)
                 .Build();
         }
 

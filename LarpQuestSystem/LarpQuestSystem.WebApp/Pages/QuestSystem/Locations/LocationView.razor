@@ -20,6 +20,7 @@ else
 {
     <p><em>Название: @_location.Location.Name</em></p>
     <p><em>Описание: @_location.Location.Description</em></p>
+    <p><em>Заявок оплачено: @_location.Location.RequestsPayed</em></p>
     <AuthorizeView Policy="@Policies.IsAdmin">
         <div style="margin-bottom: 10px">
             <button class="btn btn-primary" @onclick="@EditLocation">Редактировать локацию</button>

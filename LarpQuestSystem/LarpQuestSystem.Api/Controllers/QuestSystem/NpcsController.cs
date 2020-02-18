@@ -15,9 +15,9 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
     [ApiController]
     public class NpcsController : ControllerBase
     {
-        readonly QuestContext _db;
+        readonly LarpSystemContext _db;
 
-        public NpcsController(QuestContext context)
+        public NpcsController(LarpSystemContext context)
         {
             _db = context;
         }
@@ -113,7 +113,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return new ObjectResult(npcInfo);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPost]
         public async Task<ActionResult<Npc>> Post(Npc npc)
         {
@@ -132,7 +132,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(npc);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpPut]
         public async Task<ActionResult<Npc>> Put(Npc npc)
         {
@@ -150,7 +150,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
             return Ok(npc);
         }
 
-        [Authorize(Policy = Policies.IsAdmin)]
+        [Authorize(Policy = Policies.IsScriptManager)]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Npc>> Delete(int id)
         {
