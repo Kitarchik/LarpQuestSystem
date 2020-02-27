@@ -34,12 +34,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _materials = await Http.GetJsonAsync<List<MaterialWithTotalView>>($"{BaseApiUrl}/materials");
+        //_materials = await Http.GetJsonAsync<List<MaterialWithTotalView>>($"{BaseApiUrl}/materials");
     }
 
     private void ChangeMaterials(List<MaterialWithTotalView> materials)
     {
-        _materials = materials;
+        //_materials = materials;
         StateHasChanged();
     }
 }

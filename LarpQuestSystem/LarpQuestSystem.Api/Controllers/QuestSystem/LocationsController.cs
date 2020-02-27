@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LarpQuestSystem.Data;
@@ -160,7 +161,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
         private void DeleteMaterialsRequest(Location location)
         {
             var materialsRequest = _db.MaterialsRequests
-                .First(x => x.IsPayed && 
+                .First(x => x.IsPayed &&
                             x.Customer == "За взносы" &&
                             x.LocationId == location.Id);
 

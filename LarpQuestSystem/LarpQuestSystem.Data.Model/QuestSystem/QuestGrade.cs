@@ -8,7 +8,7 @@ namespace LarpQuestSystem.Data.Model.QuestSystem
         MicroQuest = 0,
         [StringValue("Средний квест")]
         AverageQuest = 1,
-        [StringValue("Макро квест")]
+        [StringValue("Макроквест")]
         MacroQuest = 2,
     }
 }

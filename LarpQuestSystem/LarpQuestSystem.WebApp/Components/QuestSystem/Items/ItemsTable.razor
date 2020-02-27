@@ -1,5 +1,6 @@
 ﻿@using LarpQuestSystem.Data.Model
 @using LarpQuestSystem.Data.Model.QuestSystem
+@using LarpQuestSystem.Data.Model.Utilities
 @inject NavigationManager NavigationManager
 
 <input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название предмета" />
@@ -7,6 +8,7 @@
     <thead>
         <tr>
             <th>Название предмета</th>
+            <th>Тип предмета</th>
             <th>Количество готовых (шт)</th>
             <th>Описание</th>
         </tr>
@@ -16,6 +18,7 @@
         {
             <tr @onclick="(() => NavigateToItemView(item.Id))">
                 <td>@item.Name</td>
+                <td>@GetItemType(item.ItemType)</td>
                 <td>@item.AmountReady</td>
                 <td>@item.Description</td>
             </tr>
@@ -56,6 +59,12 @@
     private void NavigateToItemView(int itemId)
     {
         NavigationManager.NavigateTo($"/items/{itemId}");
+    }
+
+    private string GetItemType(int type)
+    {
+        var enumValue = (ItemType)type;
+        return enumValue.GetStringValue();
     }
 
 }

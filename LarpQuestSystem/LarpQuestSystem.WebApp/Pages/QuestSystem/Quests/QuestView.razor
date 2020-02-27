@@ -49,7 +49,7 @@ else
     <p>Квест принимает: <button class="btn btn-primary" @onclick="(() => NavigateToNpcView(_questEnding.Id))">@_questEnding.Name</button></p>
     <p>Количество копий в печать: @_quest.AmountToPrint</p>
     <p>Сложность: @GetComplexity(_quest.Complexity)</p>
-    <p>Градация: @GetGrade(_quest.Complexity)</p>
+    <p>Градация: @GetGrade(_quest.Grade)</p>
     <AuthorizeView Policy="@Policies.IsAdmin">
         <div style="margin-bottom: 10px">
             <button class="btn btn-primary" @onclick="@EditQuest">Редактировать Квест</button>
