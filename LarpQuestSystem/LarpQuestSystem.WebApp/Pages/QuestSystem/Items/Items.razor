@@ -32,7 +32,8 @@ else
     private List<Item> _items { get; set; }
     private string _message = "Загрузка...";
 
-    [CascadingParameter(Name = "BaseApiUrl")] protected string BaseApiUrl { get; set; }
+    [CascadingParameter(Name = "BaseApiUrl")] 
+    protected string BaseApiUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

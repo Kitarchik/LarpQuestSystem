@@ -4,14 +4,16 @@ using LarpQuestSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LarpQuestSystem.Data.Migrations.Quest
 {
     [DbContext(typeof(LarpSystemContext))]
-    partial class QuestContextModelSnapshot : ModelSnapshot
+    [Migration("20200227132055_ItemPictureAdd")]
+    partial class ItemPictureAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,8 +148,7 @@ namespace LarpQuestSystem.Data.Migrations.Quest
                         .HasMaxLength(250);
 
                     b.Property<string>("PictureLink")
-                        .HasColumnType("nvarchar(2000)")
-                        .HasMaxLength(2000);
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

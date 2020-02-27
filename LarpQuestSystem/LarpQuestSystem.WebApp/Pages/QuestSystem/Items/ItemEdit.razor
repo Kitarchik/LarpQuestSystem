@@ -19,44 +19,50 @@
 }
 else
 {
-    <EditForm Model="@_item" OnValidSubmit="@Submit">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
+<EditForm Model="@_item" OnValidSubmit="@Submit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-        <div class="form-group row">
-            <label for="txtItemName" class="col-sm-2 col-form-label">Имя НПС</label>
-            <div class="col-sm-10">
-                <InputText id="txtItemName" class="form-control" @bind-Value="@_item.Name"></InputText>
-                <ValidationMessage For="@(() => _item.Name)"></ValidationMessage>
-            </div>
+    <div class="form-group row">
+        <label for="txtItemName" class="col-sm-2 col-form-label">Имя НПС</label>
+        <div class="col-sm-10">
+            <InputText id="txtItemName" class="form-control" @bind-Value="@_item.Name"></InputText>
+            <ValidationMessage For="@(() => _item.Name)"></ValidationMessage>
         </div>
-        <div class="form-group row">
-            <label for="txtItemDescription" class="col-sm-2 col-form-label">Описание</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" id="txtItemDescription" rows="5" @bind="@_item.Description"></textarea>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtItemDescription" class="col-sm-2 col-form-label">Описание</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtItemDescription" rows="5" @bind="@_item.Description"></textarea>
         </div>
-        <div class="form-group row">
-            <label for="txtAmountReady" class="col-sm-2 col-form-label">Количество готовых предметов</label>
-            <div class="col-sm-10">
-                <input type="text" id="txtAmountReady" class="form-control" @bind="@_amountReadyString" />
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtItemDescription" class="col-sm-2 col-form-label">Картинка</label>
+        <div class="col-sm-10">
+            <textarea class="form-control" id="txtItemDescription" rows="5" @bind="@_item.PictureLink"></textarea>
         </div>
-        <div class="form-group row">
-            <label for="itemType" class="col-sm-2 col-form-label">Тип предмета</label>
-            <div class="col-sm-10">
-                <select id="itemType" @bind="@_item.ItemType">
-                    @foreach (int itemType in Enum.GetValues(typeof(ItemType)))
-                    {
-                        <option value="@itemType">@GetStringItemTypeValue(itemType)</option>
-                    }
-                </select>
-            </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtAmountReady" class="col-sm-2 col-form-label">Количество готовых предметов</label>
+        <div class="col-sm-10">
+            <input type="text" id="txtAmountReady" class="form-control" @bind="@_amountReadyString" />
         </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+    </div>
+    <div class="form-group row">
+        <label for="itemType" class="col-sm-2 col-form-label">Тип предмета</label>
+        <div class="col-sm-10">
+            <select id="itemType" @bind="@_item.ItemType">
+                @foreach (int itemType in Enum.GetValues(typeof(ItemType)))
+                {
+                    <option value="@itemType">@GetStringItemTypeValue(itemType)</option>
+                }
+            </select>
         </div>
-    </EditForm>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" @onclick="Cancel">Отмена</button>
+    </div>
+</EditForm>
 }
 
 @code {

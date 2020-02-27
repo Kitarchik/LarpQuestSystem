@@ -47,6 +47,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
                     Description = item.Description,
                     Id = item.Id,
                     ItemType = item.ItemType,
+                    PictureLink = item.PictureLink,
                     Name = item.Name,
                 },
                 QuestItems = item.QuestItems.Select(x => new QuestItem
@@ -70,6 +71,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
                     {
                         Id=x.ItemId,
                         Name = x.Item.Name,
+                        PictureLink = x.Item.PictureLink,
                     },
                 }).ToList(),
             };

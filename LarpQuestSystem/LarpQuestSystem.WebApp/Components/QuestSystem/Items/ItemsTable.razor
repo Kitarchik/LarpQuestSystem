@@ -1,14 +1,16 @@
-﻿@using LarpQuestSystem.Data.Model
-@using LarpQuestSystem.Data.Model.QuestSystem
+﻿@using LarpQuestSystem.Data.Model.QuestSystem
 @using LarpQuestSystem.Data.Model.Utilities
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 
 <input type="text" id="filterByName" @bind-value="FilterString" @bind-value:event="oninput" placeholder="Название предмета" />
 <table class="table">
     <thead>
         <tr>
+            <th></th>
             <th>Название предмета</th>
             <th>Тип предмета</th>
+            <th>Картинка</th>
             <th>Количество готовых (шт)</th>
             <th>Описание</th>
         </tr>
@@ -16,9 +18,16 @@
     <tbody>
         @foreach (var item in _filteredItems)
         {
-            <tr @onclick="(() => NavigateToItemView(item.Id))">
+            <tr>
+                <td><button class="btn btn-primary" @onclick="(() => NavigateToItemView(item.Id))"> <span class="oi oi-pencil" aria-hidden="true"></span></button></td>
                 <td>@item.Name</td>
                 <td>@GetItemType(item.ItemType)</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.PictureLink))
+                    {
+                        <button class="btn btn-primary" @onclick="(() => OpenPicture(item.PictureLink))"> <span class="oi oi-image" aria-hidden="true"></span></button>
+                    }
+                </td>
                 <td>@item.AmountReady</td>
                 <td>@item.Description</td>
             </tr>
@@ -65,6 +74,11 @@
     {
         var enumValue = (ItemType)type;
         return enumValue.GetStringValue();
+    }
+
+    private void OpenPicture(string pictureLink)
+    {
+        JsRuntime.InvokeAsync<object>("open", pictureLink, "_black");
     }
 
 }

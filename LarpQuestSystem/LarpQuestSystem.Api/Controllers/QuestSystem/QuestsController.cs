@@ -104,6 +104,7 @@ namespace LarpQuestSystem.Api.Controllers.QuestSystem
                     {
                         Id = x.ItemId,
                         Name = x.Item.Name,
+                        PictureLink = x.Item.PictureLink,
                     },
                     Quest = new Quest
                     {

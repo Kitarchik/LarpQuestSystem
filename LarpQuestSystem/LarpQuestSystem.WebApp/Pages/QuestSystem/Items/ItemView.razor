@@ -9,6 +9,7 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IModalService Modal
+@inject IJSRuntime JsRuntime
 
 <h1>Квестовый предмет</h1>
 
@@ -20,6 +21,12 @@ else
 {
     <p><em>Название: @_item.Item.Name</em></p>
     <p><em>Описание: @_item.Item.Description</em></p>
+    <p>
+        @if (!string.IsNullOrEmpty(_item.Item.PictureLink))
+        {
+            <button class="btn btn-primary" @onclick="@OpenPicture"> <span class="oi oi-image" aria-hidden="true"></span> Открыть картинку</button>
+        }
+    </p>
     <p><em>Количество готовых предметов: @_item.Item.AmountReady</em></p>
     <p><em>Тип предмета: @GetItemType(_item.Item.ItemType)</em></p>
     <AuthorizeView Policy="@Policies.IsAdmin">
@@ -84,5 +91,10 @@ else
     private void EditItem()
     {
         NavigationManager.NavigateTo($"/items/edit/{ItemId}");
+    }
+
+    private void OpenPicture()
+    {
+        JsRuntime.InvokeAsync<object>("open", _item.Item.PictureLink, "_black");
     }
 }

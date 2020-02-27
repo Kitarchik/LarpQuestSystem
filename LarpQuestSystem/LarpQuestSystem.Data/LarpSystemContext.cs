@@ -112,6 +112,9 @@ namespace LarpQuestSystem.Data
             modelBuilder.Entity<Item>()
                 .HasIndex(x => x.Name)
                 .IsUnique();
+            modelBuilder.Entity<Item>()
+               .Property(x => x.PictureLink)
+               .HasMaxLength(2000);
             modelBuilder.Entity<Quest>()
                 .Property(x => x.Name)
                 .HasMaxLength(250);
